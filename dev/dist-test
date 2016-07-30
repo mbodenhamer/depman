@@ -1,0 +1,57 @@
+#!/usr/bin/env python
+
+import os
+import sys
+from glob import glob
+from lxml import etree
+from subprocess import call
+from xunitmerge import merge_xunit
+
+USAGE = 'dist-test VERSION'
+
+def report(fpath):
+    root = etree.parse(fpath).getroot()
+
+    print("Tests run: {}".format(root.attrib['tests']))
+    print("Failures: {}".format(root.attrib['failures']))
+    print("Errors: {}".format(root.attrib['errors']))
+    print("Skipped: {}".format(root.attrib['skip']))
+
+def main(*args):
+    if not args:
+        print(USAGE)
+        sys.exit(1)
+
+    version = args[0]
+    
+    sdist = os.path.abspath(glob('/app/dist/*-{}.tar.gz'.format(version))[0])
+    wheel = os.path.abspath(glob('/app/dist/*-{}-*.whl'.format(version))[0])
+    versions = list(map(str.strip, os.environ['PYVERSIONS'].split(',')))
+    
+    call('cp -r /app/tests /tests', shell=True)
+    
+    xunits = []
+    os.chdir('/tmp')
+    for pyver in versions:
+        sdist_env = '{}-sdist'.format(pyver)
+        sdist_xunit = '/tmp/{}.xml'.format(sdist_env)
+        print('sdist_env: {}'.format(sdist_env))
+        call('pyenv virtualenv {} {}'.format(pyver, sdist_env), shell=True)
+        call('test-dist {} {} {}'.format(sdist, sdist_env, sdist_xunit), 
+             shell=True)
+        xunits.append(sdist_xunit)
+
+        wheel_env = '{}-wheel'.format(pyver)
+        wheel_xunit = '/tmp/{}.xml'.format(wheel_env)
+        print('wheel_env: {}'.format(wheel_env))
+        call('pyenv virtualenv {} {}'.format(pyver, wheel_env), shell=True)
+        call('test-dist {} {} {}'.format(wheel, wheel_env, wheel_xunit), 
+             shell=True)
+        xunits.append(wheel_xunit)
+
+    os.chdir('/app')
+    merge_xunit(files=xunits, output='/app/nosetests.xml')
+    report('/app/nosetests.xml')
+
+if __name__ == '__main__':
+    main(*sys.argv[1:])

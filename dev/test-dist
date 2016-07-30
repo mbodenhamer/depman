@@ -1,0 +1,14 @@
+#!/bin/bash
+
+dist=$1
+venv=$2
+xunit=$3
+
+source /root/.bashrc
+
+pyenv activate $venv
+python --version
+pip install nose $dist
+$(which python) /usr/local/bin/nosetests -w /tests \
+    --with-xunit --xunit-file=${xunit}
+pyenv deactivate
