@@ -1,0 +1,9 @@
+dev:
+  apt:
+    - libxml2-dev
+    - libxslt1-dev
+
+prod:
+  pip:
+    - lxml
+    - PyYAML

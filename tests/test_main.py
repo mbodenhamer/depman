@@ -1,23 +1,37 @@
 import os
+import sys
 from shlex import shlex
+from syn.five import STR
 from mock import MagicMock
 from syn.base_utils import assign
 from depman.main import main
-import depman.main as depm
 
 #-------------------------------------------------------------------------------
 
 DIR = os.path.dirname(os.path.abspath(__file__))
-APP1 = os.path.join(DIR, 'app1')
+DEPS1 = os.path.join(DIR, 'deps1.yml')
 
 #-------------------------------------------------------------------------------
 
-def test_main_1():
+def test_main():
     def invoke(cmd):
-        main(*shlex(cmd))
+        if  isinstance(cmd, STR):
+            main(*shlex(cmd))
+        else:
+            main(*cmd)
 
-    with assign(depm, 'exit', MagicMock()):
+    # No args
+    with assign(sys, 'exit', MagicMock()):
         invoke('')
-        depm.exit.assert_called_once_with(1)
+        sys.exit.assert_called_once_with(1)
+
+    # Bad mode
+    with assign(sys, 'exit', MagicMock()):
+        invoke(['foo', DEPS1])
+        sys.exit.assert_called_once_with(2)
+
+    # Satisfy
+
+    # Check
 
 #-------------------------------------------------------------------------------
