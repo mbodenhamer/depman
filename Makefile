@@ -72,6 +72,9 @@ test:
 	@$(PYDEV) tox
 	@$(PYDEV) coverage html
 
+unit-test:
+	@$(PYDEV) bash -c "pip install . && nosetests -v --pdb --pdb-failures -w tests/unit_tests/"
+
 quick-test:
 	@$(PYDEV) bash -c "pip install . && nosetests -v --pdb --pdb-failures"
 
