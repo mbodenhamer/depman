@@ -69,10 +69,10 @@ class Dependency(Base):
 
 
 #-----------------------------------------------------------
-# APT
+# Apt
 
 
-class APT(Dependency):
+class Apt(Dependency):
     '''Representation of an apt dependency'''
     key = 'apt'
 
@@ -80,8 +80,9 @@ class APT(Dependency):
         return status('dpkg -s {}'.format(self.name)) == 0
 
     def satisfy(self):
-        command('apt-get update')
-        return command('apt-get install -y {}'.format(self.name))
+        if not self.check():
+            command('apt-get update')
+            command('apt-get install -y {}'.format(self.name))
 
 
 #-----------------------------------------------------------
@@ -120,7 +121,7 @@ class Pip(Dependency):
 
     def satisfy(self):
         if not self.check() or self.always_upgrade:
-            return command('pip install --upgrade {}'.format(self.name))
+            command('pip install --upgrade {}'.format(self.name))
 
 
 #-------------------------------------------------------------------------------
@@ -155,46 +156,19 @@ class Dependencies(Base):
                   for scope in cls.scopes}
         return cls(**kwargs)
 
-    def _operation(self, dispatch, scope):
-        if scope not in dispatch:
-            raise ValueError("Invalid dependency scope '{}'".format(scope))
-            
-        for method in dispatch[scope]:
-            method()
+    def deps_from_scope(self, scope):
+        scopes = [scope]
+        if scope == 'all':
+            scopes = self.scopes
 
-    def _check(self, lst):
-        for dep in lst:
-            dep.check()
-
-    def _check_dev(self):
-        self._check(self.dev)
-
-    def _check_prod(self):
-        self._check(self.prod)
-
-    def check(self, scope):
-        dispatch = dict(all = [self._check_dev, self._check_prod],
-                        dev = [self._check_dev],
-                        prod = [self._check_prod])
-
-        self._operation(dispatch, scope)
-
-    def _satisfy(self, lst):
-        for dep in lst:
-            dep.satisfy()
-
-    def _satisfy_dev(self):
-        self._satisfy(self.dev)
-
-    def _satisfy_prod(self):
-        self._satisfy(self.prod)
+        ret = []
+        for sc in scopes:
+            ret += getattr(self, sc)
+        return ret
 
     def satisfy(self, scope):
-        dispatch = dict(all = [self._satisfy_dev, self._satisfy_prod],
-                        dev = [self._satisfy_dev],
-                        prod = [self._satisfy_prod])
-
-        self._operation(dispatch, scope)
+        for dep in self.deps_from_scope(scope):
+            dep.satisfy()
 
 
 #-------------------------------------------------------------------------------

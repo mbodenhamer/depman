@@ -22,8 +22,6 @@ def main(*args):
 
     if mode == 'satisfy':
         deps.satisfy(scope)
-    elif mode == 'check':
-        deps.check(scope)
     else:
         print(USAGE)
         sys.exit(2)
