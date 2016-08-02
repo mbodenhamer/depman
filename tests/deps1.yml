@@ -2,8 +2,9 @@ dev:
   apt:
     - libxml2-dev
     - libxslt1-dev
+  pip:
+    - lxml
 
 prod:
   pip:
-    - lxml
     - PyYAML

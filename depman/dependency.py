@@ -1,9 +1,10 @@
 import yaml
-from syn.base import Base, Attr, init_hook, create_hook
 from syn.five import STR
 from syn.type import List
 from functools import partial
+from operator import attrgetter
 from subprocess import Popen, PIPE
+from syn.base import Base, Attr, init_hook, create_hook
 
 #-------------------------------------------------------------------------------
 # Utilities
@@ -32,7 +33,8 @@ class Dependency(Base):
     '''Basic representation of a dependency'''
     key = None
 
-    _attrs = dict(name = Attr(STR))
+    _attrs = dict(name = Attr(STR),
+                  order = Attr(int, default = 10000, internal = True))
     _opts = dict(init_validate = True,
                  optional_none = True,
                  args = ('name',))
@@ -76,6 +78,8 @@ class Apt(Dependency):
     '''Representation of an apt dependency'''
     key = 'apt'
 
+    _attrs = dict(order = Attr(int, 1))
+
     def check(self):
         return status('dpkg -s {}'.format(self.name)) == 0
 
@@ -98,7 +102,7 @@ class Pip(Dependency):
                                   doc='Minimum version required'),
                   always_upgrade = OAttr(bool, default=False,
                                          doc='Always attempt to upgrade'),
-                 )
+                  order = Attr(int, 3))
 
     @init_hook
     def _populate_freeze(self):
@@ -111,7 +115,7 @@ class Pip(Dependency):
     def check(self):
         if self.name in self.freeze:
             if self.version: 
-                if self.version >= self.freeze[self.name]:
+                if self.version <= self.freeze[self.name]:
                     return True
                 else:
                     return False
@@ -147,6 +151,7 @@ class Dependencies(Base):
             typ = DEPENDENCY_KEYS[key]
             deps.extend([typ.from_conf(obj) for obj in dct[key]])
 
+        deps.sort(key=attrgetter('order'))
         return deps
 
     @classmethod
@@ -160,10 +165,13 @@ class Dependencies(Base):
         scopes = [scope]
         if scope == 'all':
             scopes = self.scopes
+        elif scope not in self.scopes:
+            raise ValueError('Invalid scope: {}'.format(scope))
 
         ret = []
         for sc in scopes:
             ret += getattr(self, sc)
+        ret.sort(key=attrgetter('order'))
         return ret
 
     def satisfy(self, scope):

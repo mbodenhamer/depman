@@ -12,6 +12,16 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 DEPS1 = os.path.join(DIR, '../deps1.yml')
 
 #-------------------------------------------------------------------------------
+# Utilities
+
+def test_command():
+    assert depd.command('pwd').strip() == os.path.abspath(os.getcwd())
+
+def test_status():
+    assert depd.status('true') == 0
+    assert depd.status('false') == 1
+
+#-------------------------------------------------------------------------------
 # Dependency
 
 def test_dependency():
@@ -40,6 +50,7 @@ def test_dependency():
 def test_apt():
     apt = Apt('make')
     assert apt.name == 'make'
+    assert apt.order == 1
 
     with assign(depd, 'command', MagicMock()):
         with assign(depd, 'status', MagicMock(return_value=0)):
@@ -64,6 +75,7 @@ def test_apt():
 def test_pip():
     pip = Pip('six')
     assert pip.version == ''
+    assert pip.order == 3
     assert not pip.always_upgrade
     
     assert 'syn' in pip.freeze
@@ -72,10 +84,10 @@ def test_pip():
     assert pip.check()
 
     with assign(pip, 'version', '0'):
-        assert not pip.check()
+        assert pip.check()
 
     with assign(pip, 'version', '100000000000'):
-        assert pip.check()
+        assert not pip.check()
         
     with assign(pip, 'name', 'foobarbaz123789'):
         assert not pip.check()
@@ -96,6 +108,17 @@ def test_pip():
 # Dependencies
 
 def test_dependencies():
-    pass
+    with open(DEPS1, 'rt') as f:
+        deps = Dependencies.from_yaml(f)
+
+    assert_equivalent(deps, Dependencies(dev = [Apt('libxml2-dev'),
+                                                Apt('libxslt1-dev'),
+                                                Pip('lxml')],
+                                         prod = [Pip('PyYAML')]))
+
+    assert deps.deps_from_scope('all') == deps.dev + deps.prod
+    assert deps.deps_from_scope('dev') == deps.dev
+    assert deps.deps_from_scope('prod') == deps.prod
+    assert_raises(ValueError, deps.deps_from_scope, 'foo')
 
 #-------------------------------------------------------------------------------
