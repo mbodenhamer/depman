@@ -4,13 +4,19 @@ from .dependency import Dependencies
 
 #-------------------------------------------------------------------------------
 
+def exit(code):
+    sys.exit(code)
+
+#-------------------------------------------------------------------------------
+
 USAGE = '''depman MODE DEPFILE [SCOPE]
 '''
 
 def main(*args):
     if not args:
         print(USAGE)
-        sys.exit(1)
+        exit(1)
+        return # for tests when exit() is mocked
 
     mode = args[0]
     path = args[1]
@@ -25,7 +31,7 @@ def main(*args):
         deps.check(scope)
     else:
         print(USAGE)
-        sys.exit(1)
+        exit(1)
 
 #-------------------------------------------------------------------------------
 
