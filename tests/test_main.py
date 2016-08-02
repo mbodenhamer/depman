@@ -5,6 +5,8 @@ from syn.five import STR
 from mock import MagicMock
 from syn.base_utils import assign
 from depman.main import main
+import depman.dependency as depd
+from depman.dependency import Pip
 
 #-------------------------------------------------------------------------------
 
@@ -31,7 +33,12 @@ def test_main():
         sys.exit.assert_called_once_with(2)
 
     # Satisfy
-
-    # Check
+    with assign(depd, 'command', MagicMock()):
+        with assign(Pip, 'freeze', dict(lxml='', PyYAML='')):
+            with assign(depd, 'status', MagicMock(return_value=0)):
+                invoke(['satisfy', DEPS1])
+                assert depd.command.call_count == 0
+                depd.status.assert_any_call('dpkg -s libxml2-dev')
+                depd.status.assert_called_with('dpkg -s libxslt1-dev')
 
 #-------------------------------------------------------------------------------

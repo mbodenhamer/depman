@@ -56,7 +56,7 @@ class Dependency(Base):
         if not len(obj) == 1:
             raise TypeError("Invalid dict: {}".format(obj))
 
-        name = obj.keys()[0]
+        name = list(obj.keys())[0]
         kwargs = obj[name]
         kwargs['name'] = name
         return cls(**kwargs)
