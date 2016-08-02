@@ -12,6 +12,7 @@ from syn.base import Base, Attr, init_hook, create_hook
 OAttr = partial(Attr, optional=True)
 
 def command(cmd):
+    print(cmd)
     p = Popen(cmd, stdout=PIPE, shell=True)
     return p.communicate()[0].decode('utf-8')
 
