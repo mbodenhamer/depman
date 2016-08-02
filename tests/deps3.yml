@@ -1,0 +1,6 @@
+prod:
+  pip:
+    - six
+    - syn:
+        always_upgrade: yes
+        version: 0.0.7

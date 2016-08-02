@@ -10,6 +10,8 @@ from depman.dependency import Dependency, Dependencies, Pip, Apt
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 DEPS1 = os.path.join(DIR, '../deps1.yml')
+DEPS2 = os.path.join(DIR, '../deps2.yml')
+DEPS3 = os.path.join(DIR, '../deps3.yml')
 
 #-------------------------------------------------------------------------------
 # Utilities
@@ -120,5 +122,24 @@ def test_dependencies():
     assert deps.deps_from_scope('dev') == deps.dev
     assert deps.deps_from_scope('prod') == deps.prod
     assert_raises(ValueError, deps.deps_from_scope, 'foo')
+
+    with open(DEPS2, 'rt') as f:
+        deps2 = Dependencies.from_yaml(f)
+
+    assert_equivalent(deps2, Dependencies(dev = [Apt('gcc', order=0),
+                                                 Apt('make')]))
+    assert deps2.deps_from_scope('all') == deps2.dev
+    assert deps2.deps_from_scope('dev') == deps2.dev
+    assert deps2.deps_from_scope('prod') == deps2.prod == []
+
+    with open(DEPS3, 'rt') as f:
+        deps3 = Dependencies.from_yaml(f)
+
+    assert_equivalent(deps3, Dependencies(prod = [Pip('six'),
+                                                  Pip('syn', version='0.0.7',
+                                                      always_upgrade=True)]))
+    assert deps3.deps_from_scope('all') == deps3.prod
+    assert deps3.deps_from_scope('dev') == deps3.dev == []
+    assert deps3.deps_from_scope('prod') == deps3.prod
 
 #-------------------------------------------------------------------------------

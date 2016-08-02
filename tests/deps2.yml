@@ -1,0 +1,5 @@
+dev:
+  apt:
+    - make
+    - gcc:
+        order: 0
