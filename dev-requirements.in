@@ -3,6 +3,7 @@ coverage
 detox
 fmap
 lxml
+mock
 nose
 pip-tools
 Sphinx
