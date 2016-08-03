@@ -37,7 +37,7 @@ def _main(*args):
         deps.satisfy(scope)
     elif command == 'validate':
         # We will get an error of some sort before this is it isn't valid
-        print("{} successfully validated".format(path))
+        print("Validation successful")
     else:
         print(USAGE)
         sys.exit(2)

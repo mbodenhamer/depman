@@ -12,7 +12,7 @@ from depman.dependency import Pip
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 DEPS1 = os.path.join(DIR, 'deps1.yml')
-DEPSEX = os.path.join(DIR, '../examples/requirements.yml')
+DEPSEX = os.path.join(DIR, 'examples/requirements.yml')
 
 #-------------------------------------------------------------------------------
 
