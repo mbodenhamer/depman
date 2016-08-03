@@ -202,5 +202,16 @@ class Dependencies(Base):
         for dep in self.deps_from_context(context):
             dep.satisfy()
 
+    def validate(self):
+        super(Dependencies, self).validate()
+        
+        for key, value in self.includes.items():
+            assert key in self.contexts, \
+                "Each key in includes must be a valid context"
+            
+            for con in value:
+                assert con in self.contexts, \
+                    "Each list item must be a valid context"
+
 
 #-------------------------------------------------------------------------------

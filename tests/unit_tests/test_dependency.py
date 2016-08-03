@@ -172,4 +172,14 @@ def test_dependencies():
     assert_listeq(deps4.deps_from_context('c4'), deps4.contexts.c4)
     assert_listeq(deps4.deps_from_context('c5'), deps4.contexts.c5)
 
+    assert_raises(AssertionError, Dependencies,
+                  contexts = dict(c1 = [Apt('make')],
+                                  c2 = [Pip('six')]),
+                  includes = dict(c1 = ['c2', 'c3']))
+    
+    assert_raises(AssertionError, Dependencies,
+                  contexts = dict(c1 = [Apt('make')],
+                                  c2 = [Pip('six')]),
+                  includes = dict(c3 = ['c2', 'c2']))
+
 #-------------------------------------------------------------------------------
