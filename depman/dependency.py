@@ -1,9 +1,9 @@
 import yaml
 from syn.five import STR
-from syn.type import List
 from functools import partial
 from operator import attrgetter
 from subprocess import Popen, PIPE
+from syn.type import List, Mapping
 from syn.base_utils import AttrDict
 from syn.base import Base, Attr, init_hook, create_hook
 
@@ -138,10 +138,12 @@ class Dependencies(Base):
     '''Representation of the various dependency sets'''
     special_contexts = ('includes',)
 
-    _attrs = dict(contexts = Attr(AttrDict, init=lambda x: AttrDict(),
+    _attrs = dict(contexts = Attr(Mapping(List(Dependency), AttrDict),
+                                  init=lambda x: AttrDict(),
                                   doc='Diction of dependencies in their '
                                   'various contexts'),
-                  includes = Attr(AttrDict, init=lambda x: AttrDict(),
+                  includes = Attr(Mapping(List(STR), AttrDict),
+                                  init=lambda x: AttrDict(),
                                   doc='Specification of which contexts to '
                                   'include in others'))
     _opts = dict(init_validate = True,

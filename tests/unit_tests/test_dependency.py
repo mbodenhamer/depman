@@ -114,9 +114,9 @@ def test_dependencies():
         deps = Dependencies.from_yaml(f)
         
     contexts = dict(dev = [Apt('libxml2-dev'),
-                                                Apt('libxslt1-dev'),
-                                                Pip('lxml')],
-                                         prod = [Pip('PyYAML')])
+                           Apt('libxslt1-dev'),
+                           Pip('lxml')],
+                    prod = [Pip('PyYAML')])
     assert_equivalent(deps, Dependencies(contexts=contexts))
 
     for dep in deps.deps_from_context('all'):
