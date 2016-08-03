@@ -1,30 +1,35 @@
+import os
 import sys
-from syn.base_utils import getitem
+from argparse import ArgumentParser
 from .dependency import Dependencies
 
 #-------------------------------------------------------------------------------
 
-USAGE = '''depman <command> [<context> [<depfile>]]
-A lightweight dependency manager.
+DESCRIPTION = 'A lightweight dependency manager.'
 
-Possible commands:
-    satisfy     Satisfy the dependencies specified in <depfile>
-    validate    Validate <depfile> only; do not change the state of the system
-    info
+parser = ArgumentParser(prog='depman', description=DESCRIPTION)
+parser.add_argument('-f', '--depfile', dest='depfile', type=str,
+                    default=os.path.join(os.getcwd(), 'requirements.yml'),
+                    metavar='<depfile>', help='The requirements file to load')
+parser.add_argument('command', metavar='<command>', 
+                    choices=['satisfy', 'validate'],
+                    help="'satisfy' satisfies the dependcies specified in "
+                    "<depfile>.  'validate' only validates <depfile> and does "
+                    "not perform any system operations")
+parser.add_argument('context', metavar='<context>', type=str, default='all',
+                    nargs='?',
+                    help='The dependency context to perform <command> on')
 
-If no values are supplied, <depfile> defaults to "requirements.yml"'''
+USAGE = parser.format_usage().strip()
 
 #-------------------------------------------------------------------------------
 
 def _main(*args):
-    if not args:
-        print(USAGE)
-        sys.exit(1)
-        return # for tests when sys.exit() is mocked
-
-    command = args[0]
-    context = getitem(args, 1, 'all')
-    path = getitem(args, 2, 'requirements.yml')
+    opts = parser.parse_args(args)
+    
+    command = opts.command
+    context = opts.context
+    path = opts.depfile
 
     with open(path, 'rt') as f:
         deps = Dependencies.from_yaml(f)
@@ -32,11 +37,8 @@ def _main(*args):
     if command == 'satisfy':
         deps.satisfy(context)
     elif command == 'validate':
-        # We will get an error of some sort before this is it isn't valid
+        # We will get an error of some sort before this if it isn't valid
         print("Validation successful")
-    else:
-        print(USAGE)
-        sys.exit(2)
 
 #-------------------------------------------------------------------------------
 

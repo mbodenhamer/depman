@@ -207,11 +207,11 @@ class Dependencies(Base):
         
         for key, value in self.includes.items():
             assert key in self.contexts, \
-                "Each key in includes must be a valid context"
+                "Each key ({}) in includes must be a valid context".format(key)
             
             for con in value:
                 assert con in self.contexts, \
-                    "Each list item must be a valid context"
+                    "Each list item ({}) must be a valid context".format(con)
 
 
 #-------------------------------------------------------------------------------
