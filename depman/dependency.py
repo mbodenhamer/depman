@@ -4,6 +4,7 @@ from syn.type import List
 from functools import partial
 from operator import attrgetter
 from subprocess import Popen, PIPE
+from syn.base_utils import AttrDict
 from syn.base import Base, Attr, init_hook, create_hook
 
 #-------------------------------------------------------------------------------
@@ -135,14 +136,20 @@ class Pip(Dependency):
 
 class Dependencies(Base):
     '''Representation of the various dependency sets'''
-    contexts = ('dev', 'prod')
+    special_contexts = ('includes',)
 
-    _attrs = dict(dev = Attr(List(Dependency), init=lambda x: list(),
-                             doc='List of development dependencies'),
-                  prod = Attr(List(Dependency), init=lambda x: list(),
-                              doc='List of production dependencies'),
-                  )
-    _opts = dict(init_validate = True)
+    _attrs = dict(contexts = Attr(AttrDict, init=lambda x: AttrDict(),
+                                  doc='Diction of dependencies in their '
+                                  'various contexts'),
+                  includes = Attr(AttrDict, init=lambda x: AttrDict(),
+                                  doc='Specification of which contexts to '
+                                  'include in others'))
+    _opts = dict(init_validate = True,
+                 coerce_args = True)
+
+    @classmethod
+    def _contexts(cls, dct):
+        return [key for key in dct if key not in cls.special_contexts]
 
     @classmethod
     def _from_context(cls, dct):
@@ -158,8 +165,12 @@ class Dependencies(Base):
     @classmethod
     def from_yaml(cls, fil):
         dct = yaml.load(fil)
-        kwargs = {context: cls._from_context(dct.get(context, {}))
-                  for context in cls.contexts}
+        contexts = cls._contexts(dct)
+        includes = dct.get('includes', {})
+        contexts = {context: cls._from_context(dct.get(context, {}))
+                    for context in contexts}
+        kwargs = dict(contexts = AttrDict(contexts),
+                      includes = AttrDict(includes))
         return cls(**kwargs)
 
     def deps_from_context(self, context):
@@ -170,8 +181,8 @@ class Dependencies(Base):
             raise ValueError('Invalid context: {}'.format(context))
 
         ret = []
-        for sc in contexts:
-            ret += getattr(self, sc)
+        for con in contexts:
+            ret += getattr(self.contexts, con)
         ret.sort(key=attrgetter('order'))
         return ret
 

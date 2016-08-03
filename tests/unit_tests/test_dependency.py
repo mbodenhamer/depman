@@ -112,34 +112,41 @@ def test_pip():
 def test_dependencies():
     with open(DEPS1, 'rt') as f:
         deps = Dependencies.from_yaml(f)
-
-    assert_equivalent(deps, Dependencies(dev = [Apt('libxml2-dev'),
+        
+    contexts = dict(dev = [Apt('libxml2-dev'),
                                                 Apt('libxslt1-dev'),
                                                 Pip('lxml')],
-                                         prod = [Pip('PyYAML')]))
+                                         prod = [Pip('PyYAML')])
+    assert_equivalent(deps, Dependencies(contexts=contexts))
 
-    assert deps.deps_from_context('all') == deps.dev + deps.prod
-    assert deps.deps_from_context('dev') == deps.dev
-    assert deps.deps_from_context('prod') == deps.prod
+    for dep in deps.deps_from_context('all'):
+        assert dep in deps.contexts.dev or dep in deps.contexts.prod
+
+    assert deps.deps_from_context('dev') == deps.contexts.dev
+    assert deps.deps_from_context('prod') == deps.contexts.prod
     assert_raises(ValueError, deps.deps_from_context, 'foo')
 
     with open(DEPS2, 'rt') as f:
         deps2 = Dependencies.from_yaml(f)
 
-    assert_equivalent(deps2, Dependencies(dev = [Apt('gcc', order=0),
-                                                 Apt('make')]))
-    assert deps2.deps_from_context('all') == deps2.dev
-    assert deps2.deps_from_context('dev') == deps2.dev
-    assert deps2.deps_from_context('prod') == deps2.prod == []
+    contexts = dict(dev = [Apt('gcc', order=0),
+                           Apt('make')])
+
+    assert_equivalent(deps2, Dependencies(contexts = contexts))
+    assert deps2.deps_from_context('all') == deps2.contexts.dev
+    assert deps2.deps_from_context('dev') == deps2.contexts.dev
+    assert_raises(ValueError, deps2.deps_from_context, 'prod')
 
     with open(DEPS3, 'rt') as f:
         deps3 = Dependencies.from_yaml(f)
 
-    assert_equivalent(deps3, Dependencies(prod = [Pip('six'),
-                                                  Pip('syn', version='0.0.7',
-                                                      always_upgrade=True)]))
-    assert deps3.deps_from_context('all') == deps3.prod
-    assert deps3.deps_from_context('dev') == deps3.dev == []
-    assert deps3.deps_from_context('prod') == deps3.prod
+    contexts = dict(prod = [Pip('six'),
+                            Pip('syn', version='0.0.7',
+                                always_upgrade=True)])
+
+    assert_equivalent(deps3, Dependencies(contexts=contexts))
+    assert deps3.deps_from_context('all') == deps3.contexts.prod
+    assert_raises(ValueError, deps3.deps_from_context, 'dev')
+    assert deps3.deps_from_context('prod') == deps3.contexts.prod
 
 #-------------------------------------------------------------------------------
