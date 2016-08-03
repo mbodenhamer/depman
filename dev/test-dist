@@ -8,7 +8,7 @@ source /root/.bashrc
 
 pyenv activate $venv
 python --version
-pip install nose $dist
+pip install nose mock $dist
 $(which python) /usr/local/bin/nosetests -w /tests \
     --with-xunit --xunit-file=${xunit}
 pyenv deactivate
