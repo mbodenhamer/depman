@@ -4,17 +4,13 @@ from .dependency import Dependencies
 
 #-------------------------------------------------------------------------------
 
-USAGE = '''depman <command> [<scope> [<depfile>]]
+USAGE = '''depman <command> [<context> [<depfile>]]
 A lightweight dependency manager.
 
 Possible commands:
     satisfy     Satisfy the dependencies specified in <depfile>
     validate    Validate <depfile> only; do not change the state of the system
-
-Possible scopes:
-    all         Combines all possible scopes (default)
-    dev         Development dependencies
-    prod        Production dependencies
+    info
 
 If no values are supplied, <depfile> defaults to "requirements.yml"'''
 
@@ -27,14 +23,14 @@ def _main(*args):
         return # for tests when sys.exit() is mocked
 
     command = args[0]
-    scope = getitem(args, 1, 'all')
+    context = getitem(args, 1, 'all')
     path = getitem(args, 2, 'requirements.yml')
 
     with open(path, 'rt') as f:
         deps = Dependencies.from_yaml(f)
 
     if command == 'satisfy':
-        deps.satisfy(scope)
+        deps.satisfy(context)
     elif command == 'validate':
         # We will get an error of some sort before this is it isn't valid
         print("Validation successful")

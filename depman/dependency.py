@@ -135,17 +135,17 @@ class Pip(Dependency):
 
 class Dependencies(Base):
     '''Representation of the various dependency sets'''
-    scopes = ('dev', 'prod')
+    contexts = ('dev', 'prod')
 
     _attrs = dict(dev = Attr(List(Dependency), init=lambda x: list(),
                              doc='List of development dependencies'),
                   prod = Attr(List(Dependency), init=lambda x: list(),
                               doc='List of production dependencies'),
-                 )
+                  )
     _opts = dict(init_validate = True)
 
     @classmethod
-    def _from_scope(cls, dct):
+    def _from_context(cls, dct):
         deps = []
     
         for key in dct:
@@ -158,25 +158,25 @@ class Dependencies(Base):
     @classmethod
     def from_yaml(cls, fil):
         dct = yaml.load(fil)
-        kwargs = {scope: cls._from_scope(dct.get(scope, {}))
-                  for scope in cls.scopes}
+        kwargs = {context: cls._from_context(dct.get(context, {}))
+                  for context in cls.contexts}
         return cls(**kwargs)
 
-    def deps_from_scope(self, scope):
-        scopes = [scope]
-        if scope == 'all':
-            scopes = self.scopes
-        elif scope not in self.scopes:
-            raise ValueError('Invalid scope: {}'.format(scope))
+    def deps_from_context(self, context):
+        contexts = [context]
+        if context == 'all':
+            contexts = self.contexts
+        elif context not in self.contexts:
+            raise ValueError('Invalid context: {}'.format(context))
 
         ret = []
-        for sc in scopes:
+        for sc in contexts:
             ret += getattr(self, sc)
         ret.sort(key=attrgetter('order'))
         return ret
 
-    def satisfy(self, scope):
-        for dep in self.deps_from_scope(scope):
+    def satisfy(self, context):
+        for dep in self.deps_from_context(context):
             dep.satisfy()
 
 
