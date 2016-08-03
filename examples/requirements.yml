@@ -1,0 +1,14 @@
+dev:
+  apt:
+    - libxml2-dev
+    - libxslt1-dev
+  pip:
+    - lxml
+
+prod:
+  pip:
+    - gevent:
+        version: 1.0.2
+    - texttable
+    - syn:
+        always_upgrade: yes
