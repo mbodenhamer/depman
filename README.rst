@@ -28,6 +28,7 @@ Usage
 
     Possible commands:
 	satisfy     Satisfy the dependencies specified in <depfile>
+        validate    Validate <depfile> only; do not change the state of the system
 
     Possible scopes:
 	all         Combines all possible scopes (default)
