@@ -1,0 +1,26 @@
+includes:
+  c1:
+    - c2
+    - c4
+  c2:
+    - c3
+
+c1:
+  apt:
+    - make
+
+c2:
+  apt:
+    - gcc
+
+c3:
+  apt:
+    - g++
+
+c4:
+  pip:
+    - six
+
+c5:
+  pip:
+    - syn

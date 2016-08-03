@@ -175,12 +175,22 @@ class Dependencies(Base):
                       includes = AttrDict(includes))
         return cls(**kwargs)
 
+    def contexts_from_includes(self, context, contexts):
+        new = self.includes.get(context, [])
+
+        if new:
+            contexts.extend(list(filter(lambda c: c not in contexts, new)))
+            for con in new:
+                self.contexts_from_includes(con, contexts)
+
     def deps_from_context(self, context):
         contexts = [context]
         if context == 'all':
             contexts = self.contexts
         elif context not in self.contexts:
             raise ValueError('Invalid context: {}'.format(context))
+
+        self.contexts_from_includes(context, contexts)
 
         ret = []
         for con in contexts:

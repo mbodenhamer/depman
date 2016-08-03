@@ -12,6 +12,7 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 DEPS1 = os.path.join(DIR, '../deps1.yml')
 DEPS2 = os.path.join(DIR, '../deps2.yml')
 DEPS3 = os.path.join(DIR, '../deps3.yml')
+DEPS4 = os.path.join(DIR, '../deps4.yml')
 
 #-------------------------------------------------------------------------------
 # Utilities
@@ -110,6 +111,12 @@ def test_pip():
 # Dependencies
 
 def test_dependencies():
+    def assert_listeq(A, B):
+        for a in A:
+            assert a in B
+        for b in B:
+            assert b in A
+
     with open(DEPS1, 'rt') as f:
         deps = Dependencies.from_yaml(f)
         
@@ -119,8 +126,8 @@ def test_dependencies():
                     prod = [Pip('PyYAML')])
     assert_equivalent(deps, Dependencies(contexts=contexts))
 
-    for dep in deps.deps_from_context('all'):
-        assert dep in deps.contexts.dev or dep in deps.contexts.prod
+    assert_listeq(deps.deps_from_context('all'),
+                  deps.contexts.dev + deps.contexts.prod)
 
     assert deps.deps_from_context('dev') == deps.contexts.dev
     assert deps.deps_from_context('prod') == deps.contexts.prod
@@ -148,5 +155,21 @@ def test_dependencies():
     assert deps3.deps_from_context('all') == deps3.contexts.prod
     assert_raises(ValueError, deps3.deps_from_context, 'dev')
     assert deps3.deps_from_context('prod') == deps3.contexts.prod
+
+    with open(DEPS4, 'rt') as f:
+        deps4 = Dependencies.from_yaml(f)
+
+    assert 'includes' not in deps4.contexts
+
+    assert_listeq(deps4.deps_from_context('c1'),
+                  deps4.contexts.c1 + deps4.contexts.c2 +
+                  deps4.contexts.c3 + deps4.contexts.c4)
+
+    assert_listeq(deps4.deps_from_context('c2'),
+                  deps4.contexts.c2 + deps4.contexts.c3)
+
+    assert_listeq(deps4.deps_from_context('c3'), deps4.contexts.c3)
+    assert_listeq(deps4.deps_from_context('c4'), deps4.contexts.c4)
+    assert_listeq(deps4.deps_from_context('c5'), deps4.contexts.c5)
 
 #-------------------------------------------------------------------------------
