@@ -20,8 +20,8 @@ DEPS5 = os.path.join(DIR, '../deps5.yml')
 #-------------------------------------------------------------------------------
 # Utilities
 
-def test_command():
-    assert depd.command('pwd').strip() == os.path.abspath(os.getcwd())
+def test_output():
+    assert depd.output('pwd').strip() == os.path.abspath(os.getcwd())
 
 def test_status():
     assert depd.status('true') == 0

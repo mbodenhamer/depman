@@ -1,6 +1,6 @@
 from syn.five import STR
 from syn.base import init_hook, Attr
-from .dependency import Dependency, command
+from .dependency import Dependency, command, output
 from .operation import Combinable
 
 #-------------------------------------------------------------------------------
@@ -36,7 +36,7 @@ class Pip(Dependency):
     def _populate_freeze(self):
         cls = type(self)
         if not cls.freeze:
-            pkgs = command('pip freeze')
+            pkgs = output('pip freeze')
             cls.freeze = dict([tuple(line.split('==')) 
                                for line in pkgs.split('\n') if line])
 

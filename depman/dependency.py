@@ -1,4 +1,6 @@
 import yaml
+import shlex
+from . import globals as globs
 from syn.five import STR
 from functools import partial
 from operator import attrgetter
@@ -13,15 +15,25 @@ from .operation import Operation
 
 OAttr = partial(Attr, optional=True)
 
-def command(cmd):
-    print(cmd)
-    p = Popen(cmd, stdout=PIPE, shell=True)
-    return p.communicate()[0].decode('utf-8')
+def command(cmd, capture_output=False, returncode=False, silent=None):
+    if silent is None:
+        silent = not globs.print_command
+    if not silent:
+        print(cmd)
+    args = shlex.split(cmd)
+    kwargs = {}
+    if capture_output:
+        kwargs['stdout'] = PIPE
+    p = Popen(args, **kwargs)
+    out, err = p.communicate()
+    if returncode:
+        return p.returncode
+    if capture_output:
+        out = out if out else ''
+        return out
 
-def status(cmd):
-    p = Popen(cmd, stdout=PIPE, shell=True)
-    p.communicate()
-    return p.returncode
+output = partial(command, capture_output=True)
+status = partial(command, returncode=True)
 
 #-----------------------------------------------------------
 # Order cache
