@@ -1,3 +1,6 @@
+from syn.five import xrange
+from operator import attrgetter
+from collections import MutableSequence
 from syn.base import ListWrapper, Attr
 
 #-------------------------------------------------------------------------------
@@ -14,11 +17,62 @@ def subclass_equivalent(o1, o2):
         return comp(type(o1), type(o2))
     raise TypeError("Cannot compare type and object")
 
+
+class ListView(MutableSequence):
+    '''A list view.'''
+    def __init__(self, lst, start, end):
+        if not isinstance(lst, list):
+            raise TypeError("Parameter lst must be type list")
+
+        self.list = lst
+        self.start = start
+        self.end = end
+        if self.end < 0:
+            self.end = len(self.list) + self.end + 1
+
+    def _correct_idx(self, idx):
+        if idx < 0:
+            return self.end + idx
+        return self.start + idx
+
+    def __getitem__(self, idx):
+        idx = self._correct_idx(idx)
+        if not self.start <= idx < self.end:
+            raise IndexError("index out of range")
+        return self.list[idx]
+
+    def __setitem__(self, idx, value):
+        idx = self._correct_idx(idx)
+        if not self.start <= idx < self.end:
+            raise IndexError("index out of range")
+        self.list[idx] = value
+
+    def __delitem__(self, idx):
+        idx = self._correct_idx(idx)
+        if not self.start <= idx < self.end:
+            raise IndexError("index out of range")
+        self.list.pop(idx)
+        self.end -= 1
+
+    def __iter__(self):
+        for k in xrange(self.start, self.end):
+            yield self.list[k]
+
+    def __len__(self):
+        return self.end - self.start
+
+    def insert(self, idx, obj):
+        idx = self._correct_idx(idx)
+        self.list.insert(idx, obj)
+        self.end += 1
+
+
 #-------------------------------------------------------------------------------
 # Operation
 
 
 class Operation(ListWrapper):
+    '''Representation of a system operation.'''
     _attrs = dict(order = Attr(int, doc='An integer specifying the '
                                'order in which to perform the operation '
                                '(smaller values are performed earlier)'),
@@ -26,29 +80,75 @@ class Operation(ListWrapper):
                                      'the operation'))
     _opts = dict(init_validate = True)
 
+    @classmethod
+    def optimize(cls, ops):
+        ops.sort(key=attrgetter('order'))
+
+        k = 0
+        while k < len(ops):
+            ops[k].reduce(ListView(ops, k+1, -1))
+            k += 1
+
     def combine(self, other):
-        '''Combine with another operation to increase execution efficiency.
-        
-        By default (in the base class), no combination is performed.
-        '''
-        pass
+        '''Combine with another operation to increase execution efficiency.'''
+        raise NotImplementedError
 
     def execute(self):
         '''Execute the operation on the system'''
         raise NotImplementedError
 
+    def _reduce_single(self, op, ops):
+        self.combine(op)
+
     def reduce(self, ops):
         '''Reduce a list of operations for optimizing total execution'''
         N = len(ops)
-        while True:
+        while ops:
             op = ops[0]
             if not subclass_equivalent(self, op):
                 break
             
-            self.combine(op)
+            self._reduce_single(op, ops)
             if N == len(ops):
                 break
             N = len(ops)
             
+
+#-------------------------------------------------------------------------------
+# Independent Operation
+
+
+class Independent(Operation):
+    '''An independent operation that cannot be combined with others.'''
+
+    def combine(self, other):
+        '''Combine does nothing, because operations are independent.'''
+        pass
+
+#-------------------------------------------------------------------------------
+# Combinable Operation
+
+
+class Combinable(Operation):
+    '''An operation that can be combined with others of like type.'''
+
+    def combine(self, other):
+        '''Adds the operational parameters of other to our own.'''
+        self.extend(other)
+
+    def _reduce_single(self, op, ops):
+        super(Combinable, self)._reduce_single(op, ops)
+        ops.pop(0)
+
+#-------------------------------------------------------------------------------
+# Idempotent Operation
+
+
+class Idempotent(Combinable):
+    '''An operation for which repeated executions has no meaningful effect.'''
+
+    def combine(self, other):
+        '''Does nothing, because repeating the execution is not meaningful.'''
+        pass
 
 #-------------------------------------------------------------------------------

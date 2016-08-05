@@ -1,6 +1,6 @@
-from copy import deepcopy
 from nose.tools import assert_raises
-from depman.operation import subclass_equivalent, Operation
+from depman.operation import subclass_equivalent, Operation, Independent, \
+    Combinable, Idempotent, ListView
 
 #-------------------------------------------------------------------------------
 # Utilities
@@ -23,6 +23,58 @@ def test_subclass_equivalent():
 
     assert not subclass_equivalent(A11, A2)
 
+def test_listview():
+    lst = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    
+    lv = ListView(lst, 2, 5)
+    assert len(lv) == 3
+    assert list(lv) == [2, 3, 4]
+
+    assert lv[0] == 2
+    assert lv[1] == 3
+    assert lv[2] == 4
+    assert lv[-1] == 4
+    assert lv[-2] == 3
+    assert lv[-3] == 2
+
+    assert_raises(IndexError, lv.__getitem__, 3)
+    assert_raises(IndexError, lv.__getitem__, -4)
+    assert_raises(IndexError, lv.__setitem__, 3, 8)
+    assert_raises(IndexError, lv.__delitem__, 3)
+
+    lv[0] = 10
+    assert lst == [0, 1, 10, 3, 4, 5, 6, 7, 8, 9]
+
+    lv.pop(0)
+    assert len(lv) == 2
+    assert list(lv) == [3, 4]
+    assert lst == [0, 1, 3, 4, 5, 6, 7, 8, 9]
+
+    lv.append(10)
+    assert list(lv) == [3, 4, 10]
+    assert lst == [0, 1, 3, 4, 10, 5, 6, 7, 8, 9]
+
+    lv.pop()
+    assert list(lv) == [3, 4]
+    assert lst == [0, 1, 3, 4, 5, 6, 7, 8, 9]
+
+    lv.pop()
+    lv.pop()
+    assert list(lv) == []
+    assert lst == [0, 1, 5, 6, 7, 8, 9]
+
+    assert_raises(IndexError, lv.pop)
+
+    lv = ListView(lst, 4, -1)
+    assert len(lv) == 3
+    assert list(lv) == [7, 8, 9]
+
+    lv.insert(0, 10)
+    assert list(lv) == [10, 7, 8, 9]
+    assert lst == [0, 1, 5, 6, 10, 7, 8, 9]
+
+    assert_raises(TypeError, ListView, 1, 0, 0)
+
 #-------------------------------------------------------------------------------
 # Operation
 
@@ -34,15 +86,28 @@ def test_operation():
     assert op.repetitions == 0
 
     assert_raises(NotImplementedError, op.execute)
+    assert_raises(NotImplementedError, op.combine, op)
 
-    op2 = Operation('c', order = 10)
-    op3 = Operation('d', order = 10)
+#-------------------------------------------------------------------------------
+# Operation Reduction
+
+def test_operation_reduction():
+    class Op1(Independent): pass
+    class Op2(Combinable): pass
+    class Op3(Idempotent): pass
+
+    ops = [Op1('a', order=8),
+           Op1('b', order=8),
+           Op3('c', order=9),
+           Op3('d', order=9),
+           Op2('e', order=10),
+           Op2('f', order=10)]
     
-    ops = [op2, op3]
-    cops = deepcopy(ops)
-    assert op.combine(op2) is None
+    Operation.optimize(ops)
 
-    op.reduce(ops)
-    assert ops == cops
+    assert ops == [Op1('a', order=8),
+                   Op1('b', order=8),
+                   Op3('c', order=9),
+                   Op2('e', 'f', order=10)]
 
 #-------------------------------------------------------------------------------
