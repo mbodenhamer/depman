@@ -1,6 +1,11 @@
 Changelog
 ---------
 
+0.2.1 (2016-08-06)
+~~~~~~~~~~~~~~~~~~
+
+- Refactored command() for functionality and security
+
 0.2 (2016-08-05)
 ~~~~~~~~~~~~~~~~
 
