@@ -74,6 +74,9 @@ def test_listview():
     assert lst == [0, 1, 5, 6, 10, 7, 8, 9]
 
     assert_raises(TypeError, ListView, 1, 0, 0)
+    assert_raises(ValueError, ListView, [1, 2, 3], 2, 1)
+    assert_raises(ValueError, ListView, [1, 2, 3], 5, 7)
+    assert_raises(ValueError, ListView, [1, 2, 3], 0, 7)
 
 #-------------------------------------------------------------------------------
 # Operation

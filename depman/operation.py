@@ -30,6 +30,15 @@ class ListView(MutableSequence):
         if self.end < 0:
             self.end = len(self.list) + self.end + 1
 
+        if self.end < self.start:
+            raise ValueError('End less than start')
+
+        if not 0 <= self.start < len(self.list):
+            raise ValueError('Invalid start position')
+
+        if not 0 <= self.end <= len(self.list):
+            raise ValueError('Invalid end position')
+
     def _correct_idx(self, idx):
         if idx < 0:
             return self.end + idx
