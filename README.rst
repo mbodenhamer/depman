@@ -92,7 +92,6 @@ The following features are planned for future releases:
 * Better versioning support (>=, ==, <=, etc.)
 * Support for apt versioning
 * apt PPA support
-* Dependency satisfaction optimizations
-* yum support
+* Support for other package managers
 * Support for scripted installs from source
 * Export to requirements files for various package management systems
