@@ -72,64 +72,6 @@ class Dependency(Base):
         raise NotImplementedError
 
 
-#-----------------------------------------------------------
-# Apt
-
-
-class Apt(Dependency):
-    '''Representation of an apt dependency'''
-    key = 'apt'
-
-    _attrs = dict(order = Attr(int, 1))
-
-    def check(self):
-        return status('dpkg -s {}'.format(self.name)) == 0
-
-    def satisfy(self):
-        if not self.check():
-            command('apt-get update')
-            command('apt-get install -y {}'.format(self.name))
-
-
-#-----------------------------------------------------------
-# Pip
-
-
-class Pip(Dependency):
-    '''Representation of a pip dependency'''
-    key = 'pip'
-    freeze = dict()
-
-    _attrs = dict(version = OAttr(STR, default='',
-                                  doc='Minimum version required'),
-                  always_upgrade = OAttr(bool, default=False,
-                                         doc='Always attempt to upgrade'),
-                  order = Attr(int, 3))
-
-    @init_hook
-    def _populate_freeze(self):
-        cls = type(self)
-        if not cls.freeze:
-            pkgs = command('pip freeze')
-            cls.freeze = dict([tuple(line.split('==')) 
-                               for line in pkgs.split('\n') if line])
-
-    def check(self):
-        if self.name in self.freeze:
-            if self.version: 
-                if self.version <= self.freeze[self.name]:
-                    return True
-                else:
-                    return False
-            else:
-                return True
-        return False
-
-    def satisfy(self):
-        if not self.check() or self.always_upgrade:
-            command('pip install --upgrade {}'.format(self.name))
-
-
 #-------------------------------------------------------------------------------
 # Depedencies
 
@@ -213,5 +155,10 @@ class Dependencies(Base):
                 assert con in self.contexts, \
                     "Each list item ({}) must be a valid context".format(con)
 
+
+#-------------------------------------------------------------------------------
+# __all__
+
+__all__ = ('Dependency', 'Dependencies', 'command', 'status')
 
 #-------------------------------------------------------------------------------
