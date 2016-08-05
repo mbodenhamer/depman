@@ -1,0 +1,11 @@
+prod:
+  apt:
+    - a
+    - b
+    - c
+    - d
+
+  pip:
+    - a
+    - b
+    - c

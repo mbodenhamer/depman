@@ -1,7 +1,8 @@
 from mock import MagicMock
-from depman import Pip
+from depman import Pip, Operation
 from syn.base_utils import assign
 from depman import pip as depd
+from depman.pip import Install
 
 #-------------------------------------------------------------------------------
 # Pip
@@ -9,7 +10,7 @@ from depman import pip as depd
 def test_pip():
     pip = Pip('six')
     assert pip.version == ''
-    assert pip.order == 3
+    assert pip.order == Pip.order
     assert not pip.always_upgrade
     
     assert 'syn' in pip.freeze
@@ -31,11 +32,19 @@ def test_pip():
         assert depd.command.call_count == 0
 
         with assign(pip, 'name', 'foobarbaz123789'):
-            pip.satisfy()
+            ops = pip.satisfy()
+            assert ops == [Install('foobarbaz123789', order=Pip.order)]
+            Operation.optimize(ops)
+            for op in ops:
+                op.execute()
             depd.command.assert_called_with('pip install --upgrade foobarbaz123789')
 
         with assign(pip, 'always_upgrade', True):
-            pip.satisfy()
+            ops = pip.satisfy()
+            assert ops == [Install('six', order=Pip.order)]
+            Operation.optimize(ops)
+            for op in ops:
+                op.execute()
             depd.command.assert_called_with('pip install --upgrade six')
 
 #-------------------------------------------------------------------------------

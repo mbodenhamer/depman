@@ -1,6 +1,20 @@
 from syn.five import STR
 from syn.base import init_hook, Attr
 from .dependency import Dependency, command
+from .operation import Combinable
+
+#-------------------------------------------------------------------------------
+# Pip Operations
+
+#-----------------------------------------------------------
+# pip install
+
+
+class Install(Combinable):
+    def execute(self):
+        args = ' '.join(map(str, self))
+        command('pip install --upgrade {}'.format(args))
+
 
 #-------------------------------------------------------------------------------
 # Pip
@@ -10,12 +24,13 @@ class Pip(Dependency):
     '''Representation of a pip dependency'''
     key = 'pip'
     freeze = dict()
+    order = 30
 
     _attrs = dict(version = Attr(STR, default='',
                                  doc='Minimum version required'),
                   always_upgrade = Attr(bool, default=False,
                                         doc='Always attempt to upgrade'),
-                  order = Attr(int, 3))
+                  order = Attr(int, order))
 
     @init_hook
     def _populate_freeze(self):
@@ -38,7 +53,8 @@ class Pip(Dependency):
 
     def satisfy(self):
         if not self.check() or self.always_upgrade:
-            command('pip install --upgrade {}'.format(self.name))
+            return [Install(self.name, order=self.order)]
+        return []
 
 
 #-------------------------------------------------------------------------------

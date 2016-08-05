@@ -1,9 +1,12 @@
 import os
 from syn.base import Attr
+from mock import MagicMock
 from nose.tools import assert_raises
 from depman import dependency as depd
-from syn.base_utils import assert_equivalent
+from syn.base_utils import assert_equivalent, assign
 from depman import Dependency, Dependencies, Apt, Pip
+from depman import apt as aptd
+from depman import pip as pipd
 
 #-------------------------------------------------------------------------------
 
@@ -12,6 +15,7 @@ DEPS1 = os.path.join(DIR, '../deps1.yml')
 DEPS2 = os.path.join(DIR, '../deps2.yml')
 DEPS3 = os.path.join(DIR, '../deps3.yml')
 DEPS4 = os.path.join(DIR, '../deps4.yml')
+DEPS5 = os.path.join(DIR, '../deps5.yml')
 
 #-------------------------------------------------------------------------------
 # Utilities
@@ -29,6 +33,9 @@ def test_status():
 def test_dependency():
     assert depd.DEPENDENCY_KEYS == dict(apt = Apt,
                                         pip = Pip)
+    assert depd.DEPENDENCY_ORDERS == dict(apt = Apt.order,
+                                          pip = Pip.order)
+    
 
     dep = Dependency('foo')
     assert dep.name == 'foo'
@@ -120,5 +127,29 @@ def test_dependencies():
                   contexts = dict(c1 = [Apt('make')],
                                   c2 = [Pip('six')]),
                   includes = dict(c3 = ['c2', 'c2']))
+
+    with open(DEPS5, 'rt') as f:
+        deps5 = Dependencies.from_yaml(f)
+   
+    with assign(aptd, 'status', MagicMock(return_value=1)):
+        with assign(Pip, 'freeze', dict()):
+            from depman.apt import Install, Update
+            from depman.pip import Install as PipInstall
+
+            ops = deps5.satisfy('prod', execute=False)
+            assert ops == [Update(order=Apt.order),
+                           Install('a', 'b', 'c', 'd', order=Apt.order),
+                           PipInstall('a', 'b', 'c', order=Pip.order)]
+            
+            with assign(aptd, 'command', MagicMock()):
+                with assign(pipd, 'command', MagicMock()):
+                    deps5.satisfy('prod')
+
+                    assert aptd.command.call_count == 2
+                    aptd.command.assert_any_call('apt-get update')
+                    aptd.command.assert_any_call('apt-get install -y a b c d')
+
+                    assert pipd.command.call_count == 1
+                    pipd.command.assert_any_call('pip install --upgrade a b c')
 
 #-------------------------------------------------------------------------------

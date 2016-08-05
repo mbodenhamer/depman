@@ -5,7 +5,8 @@ from operator import attrgetter
 from subprocess import Popen, PIPE
 from syn.type import List, Mapping
 from syn.base_utils import AttrDict
-from syn.base import Base, Attr, init_hook, create_hook
+from syn.base import Base, Attr, create_hook
+from .operation import Operation
 
 #-------------------------------------------------------------------------------
 # Utilities
@@ -23,6 +24,11 @@ def status(cmd):
     return p.returncode
 
 #-----------------------------------------------------------
+# Order cache
+
+DEPENDENCY_ORDERS = AttrDict()
+
+#-----------------------------------------------------------
 # Key cache
 
 DEPENDENCY_KEYS = dict()
@@ -34,18 +40,20 @@ DEPENDENCY_KEYS = dict()
 class Dependency(Base):
     '''Basic representation of a dependency'''
     key = None
+    order = 10000
 
     _attrs = dict(name = Attr(STR),
-                  order = Attr(int, default = 10000, internal = True))
+                  order = Attr(int, default = order, internal = True))
     _opts = dict(init_validate = True,
                  optional_none = True,
                  args = ('name',))
 
     @classmethod
     @create_hook
-    def _register_key(cls):
+    def _register_info(cls):
         if cls.key:
             DEPENDENCY_KEYS[cls.key] = cls
+            DEPENDENCY_ORDERS[cls.key] = cls.order
 
     @classmethod
     def from_conf(cls, obj):
@@ -140,9 +148,16 @@ class Dependencies(Base):
         ret.sort(key=attrgetter('order'))
         return ret
 
-    def satisfy(self, context):
+    def satisfy(self, context, execute=True):
+        ops = []
         for dep in self.deps_from_context(context):
-            dep.satisfy()
+            ops.extend(dep.satisfy())
+
+        Operation.optimize(ops)
+        if execute:
+            for op in ops:
+                op.execute()
+        return ops
 
     def validate(self):
         super(Dependencies, self).validate()

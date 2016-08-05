@@ -1,7 +1,7 @@
 from syn.five import xrange
 from operator import attrgetter
 from collections import MutableSequence
-from syn.base import ListWrapper, Attr
+from syn.base import ListWrapper, Attr, init_hook
 
 #-------------------------------------------------------------------------------
 # Utilities
@@ -89,12 +89,18 @@ class Operation(ListWrapper):
                                      'the operation'))
     _opts = dict(init_validate = True)
 
+    order_offset = 0
+
+    @init_hook
+    def _adjust_order(self):
+        self.order += self.order_offset
+
     @classmethod
     def optimize(cls, ops):
         ops.sort(key=attrgetter('order'))
 
         k = 0
-        while k < len(ops):
+        while k < len(ops) - 1:
             ops[k].reduce(ListView(ops, k+1, -1))
             k += 1
 
