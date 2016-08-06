@@ -53,6 +53,10 @@ def test_dependency():
     assert_equivalent(Foo.from_conf(dict(foo = dict(a = 1, b = 2))),
                       Foo('foo', a = 1, b = 2))
 
+    f = Foo('bar', a = 1, b = 2, order=5)
+    assert f.to_tuple() == ('Foo', 1, 2, 'bar', 5)
+    hash(f)
+
 #-------------------------------------------------------------------------------
 # Dependencies
 
