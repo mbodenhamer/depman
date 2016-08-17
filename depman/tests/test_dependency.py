@@ -11,11 +11,11 @@ from depman import pip as pipd
 #-------------------------------------------------------------------------------
 
 DIR = os.path.dirname(os.path.abspath(__file__))
-DEPS1 = os.path.join(DIR, '../deps1.yml')
-DEPS2 = os.path.join(DIR, '../deps2.yml')
-DEPS3 = os.path.join(DIR, '../deps3.yml')
-DEPS4 = os.path.join(DIR, '../deps4.yml')
-DEPS5 = os.path.join(DIR, '../deps5.yml')
+DEPS1 = os.path.join(DIR, '../../tests/deps1.yml')
+DEPS2 = os.path.join(DIR, '../../tests/deps2.yml')
+DEPS3 = os.path.join(DIR, '../../tests/deps3.yml')
+DEPS4 = os.path.join(DIR, '../../tests/deps4.yml')
+DEPS5 = os.path.join(DIR, '../../tests/deps5.yml')
 
 #-------------------------------------------------------------------------------
 # Utilities

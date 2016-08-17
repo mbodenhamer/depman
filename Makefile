@@ -73,7 +73,7 @@ test:
 	@$(PYDEV) coverage html
 
 unit-test:
-	@$(PYDEV) bash -c "pip install . && nosetests -s -v --pdb --pdb-failures -w tests/unit_tests/"
+	@$(PYDEV) bash -c "nosetests -s -v --pdb --pdb-failures -w depman/"
 
 quick-test:
 	@$(PYDEV) bash -c "pip install . && nosetests -v --pdb --pdb-failures"
