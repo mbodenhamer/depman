@@ -60,6 +60,10 @@ class Eq(Relation):
         return cls(s)
 
 
+class Eq_single(Eq):
+    repr = '='
+
+
 class Lt(Relation):
     func = op.lt
     repr = '<'

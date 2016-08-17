@@ -76,4 +76,8 @@ def test_relations():
     assert r.rhs == '1.0'
     assert r.name == 'a'
 
+    r = Relation.dispatch('a=1.0')
+    assert isinstance(r, Eq)
+    assert r.rhs == '1.0'
+
 #-------------------------------------------------------------------------------
