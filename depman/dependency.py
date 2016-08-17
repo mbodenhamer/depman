@@ -6,7 +6,7 @@ from functools import partial
 from operator import attrgetter
 from subprocess import Popen, PIPE
 from syn.type import List, Mapping
-from syn.base_utils import AttrDict, get_typename
+from syn.base_utils import AttrDict
 from syn.base import Base, Attr, create_hook
 from .operation import Operation
 
@@ -59,6 +59,7 @@ class Dependency(Base):
                   order = Attr(int, default = order, internal = True))
     _opts = dict(init_validate = True,
                  optional_none = True,
+                 make_hashable = True,
                  args = ('name',))
 
     @classmethod
@@ -67,15 +68,6 @@ class Dependency(Base):
         if cls.key:
             DEPENDENCY_KEYS[cls.key] = cls
             DEPENDENCY_ORDERS[cls.key] = cls.order
-
-    def to_tuple(self, *groups, **kwargs):
-        dct = self.to_dict(*groups, **kwargs)
-        values = [dct[attr] for attr in sorted(dct.keys())]
-        values.insert(0, get_typename(self))
-        return tuple(values)
-
-    def __hash__(self):
-        return hash(self.to_tuple())
 
     @classmethod
     def from_conf(cls, obj):
