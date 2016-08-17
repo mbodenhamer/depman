@@ -28,8 +28,8 @@ def command(cmd, capture_output=False, returncode=False, silent=None):
     out, err = p.communicate()
     if returncode:
         return p.returncode
+    out = out.decode('utf-8') if out else ''
     if capture_output:
-        out = out.decode('utf-8') if out else ''
         return out
     return out, p.returncode
 

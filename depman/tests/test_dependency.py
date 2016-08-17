@@ -20,6 +20,13 @@ DEPS5 = os.path.join(DIR, '../../tests/deps5.yml')
 #-------------------------------------------------------------------------------
 # Utilities
 
+def test_command():
+    out, code = depd.command('true')
+    assert out == ''
+    assert code == 0
+
+    depd.command('true', silent=False)
+
 def test_output():
     assert depd.output('pwd').strip() == os.path.abspath(os.getcwd())
 
