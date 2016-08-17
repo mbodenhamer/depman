@@ -4,7 +4,7 @@ from mock import MagicMock
 from nose.tools import assert_raises
 from depman import dependency as depd
 from syn.base_utils import assert_equivalent, assign, is_hashable
-from depman import Dependency, Dependencies, Apt, Pip
+from depman import Dependency, Dependencies, Apt, Pip, Eq
 from depman import apt as aptd
 from depman import pip as pipd
 
@@ -104,7 +104,7 @@ def test_dependencies():
         deps3 = Dependencies.from_yaml(f)
 
     contexts = dict(prod = [Pip('six'),
-                            Pip('syn', version='0.0.7',
+                            Pip('syn', version=Eq('0.0.7'),
                                 always_upgrade=True)])
 
     assert_equivalent(deps3, Dependencies(contexts=contexts))
@@ -141,7 +141,7 @@ def test_dependencies():
     with open(DEPS5, 'rt') as f:
         deps5 = Dependencies.from_yaml(f)
    
-    with assign(aptd, 'status', MagicMock(return_value=1)):
+    with assign(Apt, 'pkgs', dict()):
         with assign(Pip, 'freeze', dict()):
             from depman.apt import Install, Update
             from depman.pip import Install as PipInstall

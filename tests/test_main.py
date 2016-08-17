@@ -6,7 +6,7 @@ from syn.base_utils import assign
 from depman.main import _main
 import depman.apt as aptd
 import depman.pip as pipd
-from depman import Pip
+from depman import Pip, Apt
 
 #-------------------------------------------------------------------------------
 
@@ -27,12 +27,11 @@ def test_main():
     with assign(aptd, 'command', MagicMock()):
         with assign(pipd, 'command', MagicMock()):
             with assign(Pip, 'freeze', dict(lxml='', PyYAML='')):
-                with assign(aptd, 'status', MagicMock(return_value=0)):
+                with assign(Apt, 'pkgs', {'libxml2-dev': '',
+                                          'libxslt1-dev': ''}):
                     invoke(['satisfy', '-f', DEPS1])
                     assert aptd.command.call_count == 0
                     assert pipd.command.call_count == 0
-                    aptd.status.assert_any_call('dpkg -s libxml2-dev')
-                    aptd.status.assert_called_with('dpkg -s libxslt1-dev')
 
     # Validate
     with assign(aptd, 'command', MagicMock()):

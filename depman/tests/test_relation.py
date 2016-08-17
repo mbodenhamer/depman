@@ -4,8 +4,13 @@ from depman import Relation, Eq, Lt, Le, Gt, Ge
 # Relations
 
 def test_relations():
-    r = Relation(1)
+    r = Relation('1')
     assert r.rhs == '1'
+    assert r(2) # Anything returns True
+    assert r(0)
+
+    r = Relation()
+    assert r.rhs == ''
     assert r(2) # Anything returns True
     assert r(0)
     
@@ -13,6 +18,7 @@ def test_relations():
     assert r.rhs == ''
     assert r(2) # Anything returns True
     assert r(0)
+    assert r.name == 'asdfjkl;'
     
     r = Relation.dispatch('a<2')
     assert isinstance(r, Lt)
@@ -20,6 +26,7 @@ def test_relations():
     assert r(1.99)
     assert not r(2)
     assert not r(3)
+    assert r.name == 'a'
 
     r = Relation.dispatch('a<=2')
     assert isinstance(r, Le)
@@ -48,5 +55,25 @@ def test_relations():
     assert not r(1.99)
     assert not r(2)
     assert r(2.1)
+
+    r = Relation.dispatch('> 2.0.1 ')
+    assert isinstance(r, Gt)
+    assert r.rhs == '2.0.1'
+    assert r.emit() == '>2.0.1'
+    assert r.name == ''
+
+    r = Relation.dispatch('a')
+    assert r.rhs == ''
+    assert r.name == 'a'
+
+    r = Eq.dispatch('1.0')
+    assert isinstance(r, Eq)
+    assert r.rhs == '1.0'
+    assert not hasattr(r, 'name')
+
+    r = Eq.dispatch('a<1.0')
+    assert isinstance(r, Lt)
+    assert r.rhs == '1.0'
+    assert r.name == 'a'
 
 #-------------------------------------------------------------------------------

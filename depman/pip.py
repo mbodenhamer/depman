@@ -1,4 +1,3 @@
-from syn.five import STR
 from syn.base import init_hook, Attr
 from .dependency import Dependency, command, output
 from .operation import Combinable
@@ -26,9 +25,7 @@ class Pip(Dependency):
     freeze = dict()
     order = 30
 
-    _attrs = dict(version = Attr(STR, default='',
-                                 doc='Minimum version required'),
-                  always_upgrade = Attr(bool, default=False,
+    _attrs = dict(always_upgrade = Attr(bool, default=False,
                                         doc='Always attempt to upgrade'),
                   order = Attr(int, order))
 
@@ -42,12 +39,7 @@ class Pip(Dependency):
 
     def check(self):
         if self.name in self.freeze:
-            if self.version: 
-                if self.version <= self.freeze[self.name]:
-                    return True
-                else:
-                    return False
-            else:
+            if self.version(self.freeze[self.name]):
                 return True
         return False
 

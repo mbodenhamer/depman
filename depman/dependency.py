@@ -9,6 +9,7 @@ from syn.type import List, Mapping
 from syn.base_utils import AttrDict
 from syn.base import Base, Attr, create_hook
 from .operation import Operation
+from .relation import Relation, Eq
 
 #-------------------------------------------------------------------------------
 # Utilities
@@ -57,11 +58,13 @@ class Dependency(Base):
     order = 10000
 
     _attrs = dict(name = Attr(STR),
+                  version = Attr(Relation, init=lambda self: Relation(),
+                                 doc='Version relation for this dependency'),
                   order = Attr(int, default = order, internal = True))
     _opts = dict(init_validate = True,
                  optional_none = True,
                  make_hashable = True,
-                 args = ('name',))
+                 args = ('name', 'version'))
 
     @classmethod
     @create_hook
@@ -73,7 +76,8 @@ class Dependency(Base):
     @classmethod
     def from_conf(cls, obj):
         if isinstance(obj, STR):
-            return cls(obj)
+            ver = Relation.dispatch(obj)
+            return cls(ver.name, ver)
 
         if not isinstance(obj, dict):
             raise TypeError("Invalid object: {}".format(obj))
@@ -84,6 +88,12 @@ class Dependency(Base):
         name = list(obj.keys())[0]
         kwargs = obj[name]
         kwargs['name'] = name
+        if 'version' not in kwargs:
+            ver = Relation.dispatch(name)
+            kwargs['name'] = ver.name
+            kwargs['version'] = ver
+        else:
+            kwargs['version'] = Eq.dispatch(kwargs['version'])
         return cls(**kwargs)
 
     def check(self):

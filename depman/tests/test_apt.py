@@ -14,16 +14,13 @@ def test_apt():
     assert is_hashable(apt)
 
     with assign(depd, 'command', MagicMock()):
-        with assign(depd, 'status', MagicMock(return_value=0)):
+        with assign(Apt, 'pkgs', dict(make='1.0')):
             assert apt.check()
-            depd.status.assert_called_once_with('dpkg -s make')
-
             assert apt.satisfy() == []
             assert depd.command.call_count == 0
 
-        with assign(depd, 'status', MagicMock(return_value=1)):
+        with assign(Apt, 'pkgs', dict()):
             assert not apt.check()
-            depd.status.assert_called_once_with('dpkg -s make')
 
             ops = apt.satisfy()
             assert ops == [Update(order=Apt.order),
