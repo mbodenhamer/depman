@@ -1,7 +1,8 @@
 from fnmatch import fnmatch
 from syn.base import Attr, init_hook
-from .dependency import Dependency, status, command, output
+from .dependency import Dependency, command, output
 from .operation import Idempotent, Combinable
+from .relation import Eq, Le
 
 #-------------------------------------------------------------------------------
 # Apt Operations
@@ -14,6 +15,17 @@ class Install(Combinable):
     def execute(self):
         args = ' '.join(map(str, self))
         command('apt-get install -y {}'.format(args))
+
+
+#------------------------------------------------------------
+# apt-get remove
+
+
+class Remove(Combinable):
+    order_offset = -3
+    def execute(self):
+        args = ' '.join(map(str, self))
+        command('apt-get remove -y {}'.format(args))
 
 
 #------------------------------------------------------------
@@ -55,9 +67,21 @@ class Apt(Dependency):
         return False
 
     def satisfy(self):
+        up = [Update(order=self.order)]
+        inst = up + [Install(self.name, order=self.order)]
+        instver = up + [Install('{}={}'.format(self.name, self.version.rhs),
+                                order=self.order)]
+        down = [Remove(self.name, order=self.order)] + instver
+
+        if self.always_upgrade:
+            return inst
+        
         if not self.check():
-            return [Update(order=self.order),
-                    Install(self.name, order=self.order)]
+            if isinstance(self.version, (Eq, Le)):
+                if self.name in self.pkgs:
+                    return down
+                return instver
+            return inst
         return []
 
 

@@ -60,6 +60,8 @@ class Dependency(Base):
     _attrs = dict(name = Attr(STR),
                   version = Attr(Relation, init=lambda self: Relation(),
                                  doc='Version relation for this dependency'),
+                  always_upgrade = Attr(bool, default=False,
+                                        doc='Always attempt to upgrade'),
                   order = Attr(int, default = order, internal = True))
     _opts = dict(init_validate = True,
                  optional_none = True,

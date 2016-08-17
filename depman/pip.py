@@ -1,6 +1,7 @@
 from syn.base import init_hook, Attr
 from .dependency import Dependency, command, output
 from .operation import Combinable
+from .relation import Eq, Le
 
 #-------------------------------------------------------------------------------
 # Pip Operations
@@ -25,9 +26,7 @@ class Pip(Dependency):
     freeze = dict()
     order = 30
 
-    _attrs = dict(always_upgrade = Attr(bool, default=False,
-                                        doc='Always attempt to upgrade'),
-                  order = Attr(int, order))
+    _attrs = dict(order = Attr(int, order))
 
     @init_hook
     def _populate_freeze(self):
@@ -44,8 +43,17 @@ class Pip(Dependency):
         return False
 
     def satisfy(self):
-        if not self.check() or self.always_upgrade:
-            return [Install(self.name, order=self.order)]
+        inst = [Install(self.name, order=self.order)]
+        instver = [Install('{}=={}'.format(self.name, self.version.rhs),
+                           order=self.order)]
+
+        if self.always_upgrade:
+            return inst
+            
+        if not self.check():
+            if isinstance(self.version, (Eq, Le)):
+                return instver
+            return inst
         return []
 
 

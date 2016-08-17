@@ -1,5 +1,5 @@
 from mock import MagicMock
-from depman import Pip, Operation, Gt
+from depman import Pip, Operation, Ge
 from syn.base_utils import assign, is_hashable
 from depman import pip as depd
 from depman.pip import Install
@@ -18,10 +18,10 @@ def test_pip():
 
     assert pip.check()
 
-    with assign(pip, 'version', Gt('0')):
+    with assign(pip, 'version', Ge('0')):
         assert pip.check()
 
-    with assign(pip, 'version', Gt('100000000000')):
+    with assign(pip, 'version', Ge('100000000000')):
         assert not pip.check()
         
     with assign(pip, 'name', 'foobarbaz123789'):
