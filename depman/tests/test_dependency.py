@@ -16,6 +16,7 @@ DEPS2 = os.path.join(DIR, '../../tests/deps2.yml')
 DEPS3 = os.path.join(DIR, '../../tests/deps3.yml')
 DEPS4 = os.path.join(DIR, '../../tests/deps4.yml')
 DEPS5 = os.path.join(DIR, '../../tests/deps5.yml')
+DEPS6 = os.path.join(DIR, '../../tests/deps6.yml')
 
 #-------------------------------------------------------------------------------
 # Utilities
@@ -161,5 +162,34 @@ def test_dependencies():
 
                     assert pipd.command.call_count == 1
                     pipd.command.assert_any_call('pip install --upgrade a b c')
+
+    with open(DEPS6, 'rt') as f:
+        deps6 = Dependencies.from_yaml(f)
+
+    with assign(Apt, 'pkgs', dict(a='1', b='1.3', c='1.3', f='1')):
+        with assign(Pip, 'freeze', dict(a='1', b='1.3', c='1.3')):
+            from depman.apt import Install, Update, Remove
+            from depman.pip import Install as PipInstall
+            
+            ops = deps6.satisfy('prod', execute=False)
+            assert ops == [Remove('b', 'c', order=Apt.order),
+                           Update(order=Apt.order),
+                           Install('b=1.2', 'c=1.2', 'd', 'e=1.3', 'f',
+                                   order=Apt.order),
+                           PipInstall('b==1.2', 'c==1.2', 'd', order=Pip.order)]
+
+            with assign(aptd, 'command', MagicMock()):
+                with assign(pipd, 'command', MagicMock()):
+                    deps6.satisfy('prod')
+                    
+                    assert aptd.command.call_count == 3
+                    aptd.command.assert_any_call('apt-get remove -y b c')
+                    aptd.command.assert_any_call('apt-get update')
+                    aptd.command.assert_any_call('apt-get install -y b=1.2 '
+                                                 'c=1.2 d e=1.3 f')
+
+                    assert pipd.command.call_count == 1
+                    pipd.command.assert_any_call('pip install --upgrade b==1.2 '
+                                                 'c==1.2 d')
 
 #-------------------------------------------------------------------------------

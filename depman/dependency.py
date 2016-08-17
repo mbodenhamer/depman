@@ -95,7 +95,7 @@ class Dependency(Base):
             kwargs['name'] = ver.name
             kwargs['version'] = ver
         else:
-            kwargs['version'] = Eq.dispatch(kwargs['version'])
+            kwargs['version'] = Eq.dispatch(str(kwargs['version']))
         return cls(**kwargs)
 
     def check(self):
