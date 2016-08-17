@@ -89,8 +89,6 @@ Future Features
 
 The following features are planned for future releases:
 
-* Better versioning support (>=, ==, <=, etc.)
-* Support for apt versioning
 * apt PPA support
 * Support for other package managers
 * Support for scripted installs from source
