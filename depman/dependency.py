@@ -24,6 +24,7 @@ def command(cmd, capture_output=False, returncode=False, silent=None):
     kwargs = {}
     if capture_output:
         kwargs['stdout'] = PIPE
+        kwargs['stderr'] = PIPE
     p = Popen(args, **kwargs)
     out, err = p.communicate()
     if returncode:
