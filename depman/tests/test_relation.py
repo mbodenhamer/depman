@@ -71,7 +71,7 @@ def test_relations():
     assert r.rhs == '1.0'
     assert not hasattr(r, 'name')
 
-    r = Eq.dispatch('a<1.0')
+    r = Eq.dispatch('a < 1.0')
     assert isinstance(r, Lt)
     assert r.rhs == '1.0'
     assert r.name == 'a'

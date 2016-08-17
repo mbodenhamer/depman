@@ -38,7 +38,7 @@ class Relation(Base):
                                key=lambda x: -len(x[0])):
             if key in s:
                 name, rhs = s.split(key)
-                return rel(rhs.strip(), name=name)
+                return rel(rhs.strip(), name=name.strip())
         return cls('', name=s)
 
     def emit(self):
