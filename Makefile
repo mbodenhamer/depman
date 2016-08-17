@@ -67,13 +67,19 @@ pip-compile:
 #-------------------------------------------------------------------------------
 # Tests
 
+PY34 = source .tox/py34/bin/activate
+UNIT_TEST = nosetests -s -v --pdb --pdb-failures -w depman/
+
 test:
 	@$(PYDEV) coverage erase
 	@$(PYDEV) tox
 	@$(PYDEV) coverage html
 
 unit-test:
-	@$(PYDEV) bash -c "nosetests -s -v --pdb --pdb-failures -w depman/"
+	@$(PYDEV) bash -c "$(UNIT_TEST)"
+
+py3-unit-test:
+	@$(PYDEV) bash -c "$(PY34); $(UNIT_TEST)"
 
 quick-test:
 	@$(PYDEV) bash -c "pip install . && nosetests -v --pdb --pdb-failures"
