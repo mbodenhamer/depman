@@ -1,4 +1,4 @@
-from depman import Relation, Eq, Lt, Le, Gt, Ge
+from depman import Relation, Eq, Le, Ge
 
 #-------------------------------------------------------------------------------
 # Relations
@@ -20,14 +20,6 @@ def test_relations():
     assert r(0)
     assert r.name == 'asdfjkl;'
     
-    r = Relation.dispatch('a<2')
-    assert isinstance(r, Lt)
-    assert r(1)
-    assert r(1.99)
-    assert not r(2)
-    assert not r(3)
-    assert r.name == 'a'
-
     r = Relation.dispatch('a<=2')
     assert isinstance(r, Le)
     assert r(1)
@@ -49,17 +41,10 @@ def test_relations():
     assert r(2)
     assert r(2.1)
 
-    r = Relation.dispatch('a>2')
-    assert isinstance(r, Gt)
-    assert not r(1)
-    assert not r(1.99)
-    assert not r(2)
-    assert r(2.1)
-
-    r = Relation.dispatch('> 2.0.1 ')
-    assert isinstance(r, Gt)
+    r = Relation.dispatch('>= 2.0.1 ')
+    assert isinstance(r, Ge)
     assert r.rhs == '2.0.1'
-    assert r.emit() == '>2.0.1'
+    assert r.emit() == '>=2.0.1'
     assert r.name == ''
 
     r = Relation.dispatch('a')
@@ -71,8 +56,8 @@ def test_relations():
     assert r.rhs == '1.0'
     assert not hasattr(r, 'name')
 
-    r = Eq.dispatch('a < 1.0')
-    assert isinstance(r, Lt)
+    r = Eq.dispatch('a <= 1.0')
+    assert isinstance(r, Le)
     assert r.rhs == '1.0'
     assert r.name == 'a'
 

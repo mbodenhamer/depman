@@ -64,19 +64,9 @@ class Eq_single(Eq):
     repr = '='
 
 
-class Lt(Relation):
-    func = op.lt
-    repr = '<'
-
-
 class Le(Relation):
     func = op.le
     repr = '<='
-
-
-class Gt(Relation):
-    func = op.gt
-    repr = '>'
 
 
 class Ge(Relation):
@@ -87,6 +77,6 @@ class Ge(Relation):
 #-------------------------------------------------------------------------------
 # __all__
 
-__all__ = ('Relation', 'Eq', 'Lt', 'Le', 'Gt', 'Ge')
+__all__ = ('Relation', 'Eq', 'Le', 'Ge')
 
 #-------------------------------------------------------------------------------
