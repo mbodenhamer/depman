@@ -18,7 +18,7 @@ Installation
 ------------
 ::
 
-    $ pip install -U depman
+    $ pip install depman
 
 
 Usage
