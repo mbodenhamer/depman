@@ -1,6 +1,6 @@
 from mock import MagicMock
 from depman import Pip, Operation
-from syn.base_utils import assign
+from syn.base_utils import assign, is_hashable
 from depman import pip as depd
 from depman.pip import Install
 
@@ -12,7 +12,8 @@ def test_pip():
     assert pip.version == ''
     assert pip.order == Pip.order
     assert not pip.always_upgrade
-    
+    assert is_hashable(pip)
+
     assert 'syn' in pip.freeze
     assert 'six' in pip.freeze
 

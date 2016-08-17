@@ -1,6 +1,6 @@
 from mock import MagicMock
 from depman import Apt, Operation
-from syn.base_utils import assign
+from syn.base_utils import assign, is_hashable
 from depman import apt as depd
 from depman.apt import Install, Update
 
@@ -11,6 +11,7 @@ def test_apt():
     apt = Apt('make')
     assert apt.name == 'make'
     assert apt.order == Apt.order
+    assert is_hashable(apt)
 
     with assign(depd, 'command', MagicMock()):
         with assign(depd, 'status', MagicMock(return_value=0)):
