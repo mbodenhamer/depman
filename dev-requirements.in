@@ -2,6 +2,7 @@ check-manifest
 coverage
 detox
 fmap
+ipdb
 lxml
 mock
 nose
