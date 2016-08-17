@@ -1,80 +1,6 @@
-from syn.five import xrange
 from operator import attrgetter
-from collections import MutableSequence
 from syn.base import ListWrapper, Attr, init_hook
-
-#-------------------------------------------------------------------------------
-# Utilities
-
-def subclass_equivalent(o1, o2):
-    def comp(x, y):
-        return issubclass(x, y) or issubclass(y, x)
-
-    if isinstance(o1, type) and isinstance(o2, type):
-        return comp(o1, o2)
-    elif (isinstance(o1, object) and isinstance(o2, object) and
-          not (isinstance(o1, type) or isinstance(o2, type))):
-        return comp(type(o1), type(o2))
-    raise TypeError("Cannot compare type and object")
-
-
-class ListView(MutableSequence):
-    '''A list view.'''
-    def __init__(self, lst, start, end):
-        if not isinstance(lst, list):
-            raise TypeError("Parameter lst must be type list")
-
-        self.list = lst
-        self.start = start
-        self.end = end
-        if self.end < 0:
-            self.end = len(self.list) + self.end + 1
-
-        if self.end < self.start:
-            raise ValueError('End less than start')
-
-        if not 0 <= self.start < len(self.list):
-            raise ValueError('Invalid start position')
-
-        if not 0 <= self.end <= len(self.list):
-            raise ValueError('Invalid end position')
-
-    def _correct_idx(self, idx):
-        if idx < 0:
-            return self.end + idx
-        return self.start + idx
-
-    def __getitem__(self, idx):
-        idx = self._correct_idx(idx)
-        if not self.start <= idx < self.end:
-            raise IndexError("index out of range")
-        return self.list[idx]
-
-    def __setitem__(self, idx, value):
-        idx = self._correct_idx(idx)
-        if not self.start <= idx < self.end:
-            raise IndexError("index out of range")
-        self.list[idx] = value
-
-    def __delitem__(self, idx):
-        idx = self._correct_idx(idx)
-        if not self.start <= idx < self.end:
-            raise IndexError("index out of range")
-        self.list.pop(idx)
-        self.end -= 1
-
-    def __iter__(self):
-        for k in xrange(self.start, self.end):
-            yield self.list[k]
-
-    def __len__(self):
-        return self.end - self.start
-
-    def insert(self, idx, obj):
-        idx = self._correct_idx(idx)
-        self.list.insert(idx, obj)
-        self.end += 1
-
+from syn.base_utils import same_lineage, ListView
 
 #-------------------------------------------------------------------------------
 # Operation
@@ -120,7 +46,7 @@ class Operation(ListWrapper):
         N = len(ops)
         while ops:
             op = ops[0]
-            if not subclass_equivalent(self, op):
+            if not same_lineage(self, op):
                 break
             
             self._reduce_single(op, ops)
@@ -169,7 +95,6 @@ class Idempotent(Combinable):
 #-------------------------------------------------------------------------------
 # __all__
 
-__all__ = ('Operation', 'Independent', 'Combinable', 'Idempotent',
-           'subclass_equivalent', 'ListView')
+__all__ = ('Operation', 'Independent', 'Combinable', 'Idempotent')
 
 #-------------------------------------------------------------------------------
