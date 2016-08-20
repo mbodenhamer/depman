@@ -52,4 +52,7 @@ def test_main():
     with open(TEST1, 'rt') as f:
         assert f.read() == eout
 
+    #Version
+    invoke(['version', '-f', DEPS6])
+
 #-------------------------------------------------------------------------------

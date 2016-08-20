@@ -1,6 +1,6 @@
 import os
 from subprocess import Popen, PIPE
-from depman.main import USAGE
+from depman import __version__ as dver
 
 #-------------------------------------------------------------------------------
 
@@ -15,6 +15,13 @@ def test_invocation():
     out = p.communicate()[0].decode('utf-8')
     lines = out.strip().split('\n')
     assert lines[-1] == 'Validation successful'
+    assert p.returncode == 0
+
+    p = Popen('depman version -f {}'.format(DEPSEX), 
+              stdout=PIPE, shell=True)
+    out = p.communicate()[0].decode('utf-8')
+    lines = out.strip().split('\n')
+    assert lines[-1] == 'depman {}'.format(dver)
     assert p.returncode == 0
 
 #-------------------------------------------------------------------------------

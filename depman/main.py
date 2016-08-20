@@ -3,6 +3,7 @@ import sys
 from syn.type import Type, AnyType
 from argparse import ArgumentParser
 from .dependency import Dependencies, DEPENDENCY_KEYS
+from . import __version__ as dver
 
 #-------------------------------------------------------------------------------
 
@@ -20,7 +21,7 @@ parser.add_argument('-o', '--outfile', dest='outfile', type=str, default='',
 parser.add_argument('--no-header', dest='no_header', default=False, 
                     action='store_true', help='No export header')
 parser.add_argument('command', metavar='<command>', 
-                    choices=['satisfy', 'validate', 'export'],
+                    choices=['satisfy', 'validate', 'export', 'version'],
                     help="'satisfy' satisfies the dependcies specified in "
                     "<depfile>.  'validate' only validates <depfile> and does "
                     "not perform any system operations.  'export' exports "
@@ -74,6 +75,8 @@ def _main(*args):
         print("Validation successful")
     elif command == 'export':
         deps.export(context, deptype, outfile, include_header=include_header)
+    elif command == 'version':
+        print('depman {}'.format(dver))
 
     if outfile is not sys.stdout:
         outfile.close()
