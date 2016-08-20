@@ -1,7 +1,7 @@
 include MANIFEST.in README.rst CHANGELOG.rst LICENSE Makefile version.txt
 include requirements.txt requirements.in
 include dev-requirements.txt dev-requirements.in
-include requirements.yml
+include requirements.yml metadata
 include tox.ini Dockerfile
 recursive-include dev *
 recursive-include docs *.py
