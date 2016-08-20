@@ -47,6 +47,14 @@ def dispatch_type(typ):
     raise TypeError("Unknown type: {}".format(typ))
 
 #-------------------------------------------------------------------------------
+# Dispatch outfile
+
+def dispatch_outfile(f):
+    if not f:
+        return sys.stdout
+    return open(f, 'wt')
+
+#-------------------------------------------------------------------------------
 
 def _main(*args):
     opts = parser.parse_args(args)
@@ -55,20 +63,26 @@ def _main(*args):
     context = opts.context
     path = opts.depfile
 
-    optype = dispatch_type(opts.type)
+    deptype = dispatch_type(opts.type)
 
     with open(path, 'rt') as f:
         deps = Dependencies.from_yaml(f)
 
+    outfile = dispatch_outfile(opts.outfile)
     if command == 'satisfy':
-        deps.satisfy(context, optype)
+        deps.satisfy(context, deptype)
     elif command == 'validate':
         # We will get an error of some sort before this if it isn't valid
         print("Validation successful")
+    elif command == 'export':
+        deps.export(context, deptype, outfile)
+
+    if outfile is not sys.stdout:
+        outfile.close()
 
 #-------------------------------------------------------------------------------
 
-def main(): # pragma: no cover
-    _main(*sys.argv[1:])
+def main():
+    _main(*sys.argv[1:]) # pragma: no cover
 
 #-------------------------------------------------------------------------------
