@@ -1,8 +1,10 @@
 import os
 import sys
-from syn.type import AnyType
+from syn.type import Type, AnyType
 from argparse import ArgumentParser
 from .dependency import Dependencies
+from .apt import Apt
+from .pip import Pip
 
 #-------------------------------------------------------------------------------
 
@@ -30,11 +32,19 @@ parser.add_argument('context', metavar='<context>', type=str, default='all',
 USAGE = parser.format_usage().strip()
 
 #-------------------------------------------------------------------------------
-# Dispatch args
+# Dispatch type
+
+TYPES = dict(apt = Apt,
+             pip = Pip)
 
 def dispatch_type(typ):
     if typ == 'all':
         return AnyType()
+    if ',' in typ:
+        return Type.dispatch(tuple([dispatch_type(t) for t in typ.split(',')]))
+    if typ in TYPES:
+        return Type.dispatch(TYPES[typ])
+    raise TypeError("Unknown type: {}".format(typ))
 
 #-------------------------------------------------------------------------------
 
