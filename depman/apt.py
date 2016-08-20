@@ -1,5 +1,5 @@
 from fnmatch import fnmatch
-from syn.base import Attr, init_hook
+from syn.base import Attr, create_hook
 from .dependency import Dependency, command, output
 from .operation import Idempotent, Combinable
 from .relation import Eq, Le
@@ -51,9 +51,9 @@ class Apt(Dependency):
 
     _attrs = dict(order = Attr(int, order))
 
-    @init_hook
-    def _populate_pkgs(self):
-        cls = type(self)
+    @classmethod
+    @create_hook
+    def _populate_pkgs(cls):
         if not cls.pkgs:
             lines = output('dpkg -l').split('\n')
             partss = [l.split() for l in lines[5:] if l]
