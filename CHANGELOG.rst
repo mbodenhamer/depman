@@ -6,6 +6,7 @@ Changelog
 - Added export command
 - Added version command
 - Added -t option for dependency type filtering
+- Fixed bug in Apt.pkgs population
 
 0.3 (2016-08-19)
 ~~~~~~~~~~~~~~~~~~
