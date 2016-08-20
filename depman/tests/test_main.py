@@ -4,6 +4,8 @@ from nose.tools import assert_raises
 from syn.type import AnyType, TypeType, MultiType
 from depman import Apt, Pip
 
+#-------------------------------------------------------------------------------
+
 DIR = os.path.dirname(os.path.abspath(__file__))
 TEST1 = os.path.join(DIR, 'test1')
 
