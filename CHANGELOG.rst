@@ -1,7 +1,7 @@
 Changelog
 ---------
 
-0.3 (2016-08-20)
+0.3 (2016-08-19)
 ~~~~~~~~~~~~~~~~~~
 - Added apt version support
 - Added full version relation support

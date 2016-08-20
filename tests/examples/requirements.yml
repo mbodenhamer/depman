@@ -4,7 +4,7 @@ includes:
 
 dev:
   apt:
-    - libxml2-dev
+    - libxml2-dev=2.9.1+dfsg1-5+deb8u2
     - libxslt1-dev
   pip:
     - lxml
@@ -18,7 +18,8 @@ test:
 prod:
   pip:
     - gevent:
-        version: 1.0.2
+        version: <=1.0.2
     - texttable
-    - syn:
+    - six:
         always_upgrade: yes
+    - syn>=0.0.10
