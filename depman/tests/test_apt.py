@@ -13,6 +13,10 @@ def test_apt():
     assert apt.order == Apt.order
     assert is_hashable(apt)
 
+    if depd.output('which apt-get'):
+        if depd.output('which make'):
+            assert 'make' in Apt.pkgs
+
     with assign(depd, 'command', MagicMock()):
         with assign(Apt, 'pkgs', dict(make='1.0')):
             assert apt.check()
@@ -44,5 +48,9 @@ def test_apt():
         with assign(Apt, 'pkgs', dict()):
             Apt._populate_pkgs()
             assert Apt.pkgs == {}
+
+    if depd.output('which apt-get'):
+        if depd.output('which make'):
+            assert 'make' in Apt.pkgs
 
 #-------------------------------------------------------------------------------

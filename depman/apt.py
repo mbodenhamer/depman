@@ -42,7 +42,6 @@ class Update(Idempotent):
 #-------------------------------------------------------------------------------
 # Apt
 
-
 class Apt(Dependency):
     '''Representation of an apt dependency'''
     key = 'apt'
@@ -58,7 +57,7 @@ class Apt(Dependency):
             try:
                 lines = output('dpkg -l').split('\n')
                 partss = [l.split() for l in lines[5:] if l]
-                pkgs = [(p[1], p[2]) for p in partss if fnmatch(p[0], '?!')]
+                pkgs = [(p[1], p[2]) for p in partss if fnmatch(p[0], '?i')]
                 cls.pkgs = dict(pkgs)
             except OSError:
                 pass
