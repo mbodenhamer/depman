@@ -1,3 +1,4 @@
+import re
 from setuptools import setup, find_packages
 
 def read(fpath):
@@ -7,12 +8,19 @@ def read(fpath):
 def requirements(fpath):
     return list(filter(bool, read(fpath).split('\n')))
 
+def metadata(fpath, meta):
+    txt = read(fpath)
+    m = re.search("(?m)^{}:\s+['\"]?(.+?)['\"]?$".format(meta), txt)
+    if m:
+        return m.groups()[0]
+    raise RuntimeError('Cannot find value for {}'.format(meta))
+
 def version(fpath):
-    return read(fpath).strip()
+    return metadata(fpath, 'version')
 
 setup(
     name = 'depman',
-    version = version('version.txt'),
+    version = version('depman/metadata.yml'),
     author = 'Matt Bodenhamer',
     author_email = 'mbodenhamer@mbodenhamer.com',
     description = 'A lightweight dependency manager',
