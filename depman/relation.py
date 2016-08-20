@@ -42,7 +42,8 @@ class Relation(Base):
         return cls('', name=s)
 
     def emit(self):
-        return self.repr + self.rhs
+        repr = self.repr if self.repr else ''
+        return repr + self.rhs
 
 
 #-------------------------------------------------------------------------------
