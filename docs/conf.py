@@ -12,6 +12,7 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+import re
 import sys
 import os
 import shlex
@@ -21,6 +22,13 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 def read(fpath):
     with open(fpath, 'rt') as f:
         return f.read().strip()
+
+def metadata(fpath, meta):
+    txt = read(fpath)
+    m = re.search("(?m)^{}:\s+['\"]?(.+?)['\"]?$".format(meta), txt)
+    if m:
+        return m.groups()[0]
+    raise RuntimeError('Cannot find value for {}'.format(meta))
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -61,7 +69,7 @@ author = u'Matt Bodenhamer'
 # built documents.
 #
 # The full version, including alpha/beta/rc tags.
-release = read(os.path.join(DIR, '../version.txt'))
+release = metadata(os.path.join(DIR, '../depman/metadata.yml'), 'version')
 # The short X.Y version.
 version = release
 
