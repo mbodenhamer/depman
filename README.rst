@@ -25,20 +25,27 @@ Usage
 -----
 ::
 
-    usage: depman [-h] [-f <depfile>] <command> [<context>]
+    usage: depman [-h] [-f <depfile>] [-t <type>] [-o <outfile>] [--no-header]
+		  <command> [<context>]
 
     A lightweight dependency manager.
 
     positional arguments:
-      <command>             'satisfy' satisfies the dependencies specified in
+      <command>             'satisfy' satisfies the dependcies specified in
 			    <depfile>. 'validate' only validates <depfile> and
-			    does not perform any system operations
+			    does not perform any system operations. 'export'
+			    exports requirements to a specified file (using -o)
       <context>             The dependency context to perform <command> on
 
     optional arguments:
       -h, --help            show this help message and exit
       -f <depfile>, --depfile <depfile>
 			    The requirements file to load
+      -t <type>, --type <type>
+			    Restrict operations to dependencies of this type
+      -o <outfile>, --outfile <outfile>
+			    File to write results to
+      --no-header           No export header
 
 If not supplied, ``<depfile>`` and ``<context>`` default to ``requirements.yml`` and ``all``, respectively.
 
