@@ -1,6 +1,6 @@
 all: test
 
-VERSION = `cat version.txt | xargs`
+VERSION = `./metadata depman/metadata.yml version`
 
 PACKAGE = depman
 IMAGE = mbodenhamer/${PACKAGE}-dev
@@ -62,6 +62,9 @@ view:
 pip-compile:
 	@$(PYDEV) pip-compile dev-requirements.in
 	@$(PYDEV) pip-compile requirements.in
+
+print-version:
+	@echo $(VERSION)
 
 .PHONY: pip-compile
 #-------------------------------------------------------------------------------

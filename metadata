@@ -1,0 +1,12 @@
+#!/usr/bin/env python
+
+import re, sys
+fpath = sys.argv[1]
+meta = sys.argv[2]
+with open(fpath, 'r') as f:
+    txt = f.read().strip()
+m = re.search("(?m)^{}:\s+['\"]?(.+?)['\"]?$".format(meta), txt)
+if m:
+    print(m.groups()[0])
+else:
+    raise RuntimeError('Cannot find value for {}'.format(meta))
