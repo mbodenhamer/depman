@@ -21,7 +21,7 @@ TEST1 = os.path.join(DIR, 'test1')
 def test_main():
     def invoke(cmd):
         if  isinstance(cmd, STR):
-            _main(*shlex(cmd))
+            _main(*shlex.split(cmd))
         else:
             _main(*cmd)
 
