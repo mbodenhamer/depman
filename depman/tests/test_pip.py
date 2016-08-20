@@ -1,5 +1,6 @@
 from mock import MagicMock
 from depman import Pip, Operation, Ge
+from nose.tools import assert_raises
 from syn.base_utils import assign, is_hashable
 from depman import pip as depd
 from depman.pip import Install
@@ -46,5 +47,13 @@ def test_pip():
             for op in ops:
                 op.execute()
             depd.command.assert_called_with('pip install --upgrade six')
+
+    def bad_output(*args, **kwargs):
+        raise OSError()
+
+    with assign(depd, 'output', bad_output):
+        with assign(Pip, 'freeze', dict()):
+            Pip._populate_freeze()
+            assert Pip.freeze == {}
 
 #-------------------------------------------------------------------------------

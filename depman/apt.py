@@ -55,10 +55,13 @@ class Apt(Dependency):
     @create_hook
     def _populate_pkgs(cls):
         if not cls.pkgs:
-            lines = output('dpkg -l').split('\n')
-            partss = [l.split() for l in lines[5:] if l]
-            pkgs = [(p[1], p[2]) for p in partss if fnmatch(p[0], '?!')]
-            cls.pkgs = dict(pkgs)
+            try:
+                lines = output('dpkg -l').split('\n')
+                partss = [l.split() for l in lines[5:] if l]
+                pkgs = [(p[1], p[2]) for p in partss if fnmatch(p[0], '?!')]
+                cls.pkgs = dict(pkgs)
+            except OSError:
+                pass
 
     def check(self):
         if self.name in self.pkgs:

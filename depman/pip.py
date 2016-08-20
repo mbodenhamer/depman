@@ -1,4 +1,4 @@
-from syn.base import create_hook, Attr
+from syn.base import create_hook, init_hook, Attr
 from .dependency import Dependency, command, output
 from .operation import Combinable
 from .relation import Eq, Le
@@ -32,9 +32,12 @@ class Pip(Dependency):
     @create_hook
     def _populate_freeze(cls):
         if not cls.freeze:
-            pkgs = output('pip freeze')
-            cls.freeze = dict([tuple(line.split('==')) 
-                               for line in pkgs.split('\n') if line])
+            try:
+                pkgs = output('pip freeze')
+                cls.freeze = dict([tuple(line.split('==')) 
+                                   for line in pkgs.split('\n') if line])
+            except OSError:
+                pass
 
     def check(self):
         if self.name in self.freeze:

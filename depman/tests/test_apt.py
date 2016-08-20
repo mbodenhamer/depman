@@ -37,4 +37,12 @@ def test_apt():
             depd.command.assert_any_call('apt-get update')
             depd.command.assert_called_with('apt-get install -y make')
 
+    def bad_output(*args, **kwargs):
+        raise OSError()
+
+    with assign(depd, 'output', bad_output):
+        with assign(Apt, 'pkgs', dict()):
+            Apt._populate_pkgs()
+            assert Apt.pkgs == {}
+
 #-------------------------------------------------------------------------------
