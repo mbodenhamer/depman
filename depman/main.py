@@ -17,6 +17,8 @@ parser.add_argument('-t', '--type', dest='type', type=str,
                     help='Restrict operations to dependencies of this type')
 parser.add_argument('-o', '--outfile', dest='outfile', type=str, default='',
                     metavar='<outfile>', help='File to write results to')
+parser.add_argument('--no-header', dest='no_header', default=False, 
+                    action='store_true', help='No export header')
 parser.add_argument('command', metavar='<command>', 
                     choices=['satisfy', 'validate', 'export'],
                     help="'satisfy' satisfies the dependcies specified in "
@@ -57,6 +59,7 @@ def _main(*args):
     command = opts.command
     context = opts.context
     path = opts.depfile
+    include_header = not opts.no_header
 
     deptype = dispatch_type(opts.type)
 
@@ -70,7 +73,7 @@ def _main(*args):
         # We will get an error of some sort before this if it isn't valid
         print("Validation successful")
     elif command == 'export':
-        deps.export(context, deptype, outfile)
+        deps.export(context, deptype, outfile, include_header=include_header)
 
     if outfile is not sys.stdout:
         outfile.close()
