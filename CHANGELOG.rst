@@ -1,6 +1,12 @@
 Changelog
 ---------
 
+0.3.1 (2016-08-20)
+~~~~~~~~~~~~~~~~~~
+- Added export command
+- Added version command
+- Added -t option for dependency type filtering
+
 0.3 (2016-08-19)
 ~~~~~~~~~~~~~~~~~~
 - Added apt version support
