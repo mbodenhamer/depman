@@ -10,7 +10,6 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   depman
    changelog
 
 Indices and tables
