@@ -2,6 +2,7 @@ import yaml
 import shlex
 from . import globals as globs
 from syn.five import STR
+from syn.type import AnyType
 from functools import partial
 from operator import attrgetter
 from subprocess import Popen, PIPE
@@ -175,10 +176,14 @@ class Dependencies(Base):
         ret.sort(key=attrgetter('order'))
         return ret
 
-    def satisfy(self, context, execute=True):
+    def satisfy(self, context, optype=None, execute=True):
+        if optype is None:
+            optype = AnyType()
+
         ops = []
         for dep in self.deps_from_context(context):
-            ops.extend(dep.satisfy())
+            if optype.query(dep):
+                ops.extend(dep.satisfy())
 
         Operation.optimize(ops)
         if execute:
