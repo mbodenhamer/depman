@@ -10,3 +10,5 @@ recursive-include docs Makefile
 recursive-include tests *
 recursive-exclude tests *.pyc
 recursive-include examples *.yml
+recursive-include depman *
+recursive-exclude depman *.pyc
