@@ -1,6 +1,10 @@
 Changelog
 ---------
 
+0.3.2 (2016-08-20)
+~~~~~~~~~~~~~~~~~~
+- Fixed bug in version command
+
 0.3.1 (2016-08-20)
 ~~~~~~~~~~~~~~~~~~
 - Added export command
