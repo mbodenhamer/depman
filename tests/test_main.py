@@ -53,6 +53,6 @@ def test_main():
         assert f.read() == eout
 
     #Version
-    invoke(['version', '-f', DEPS6])
+    invoke(['version'])
 
 #-------------------------------------------------------------------------------

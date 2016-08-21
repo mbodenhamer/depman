@@ -62,6 +62,10 @@ def _main(*args):
     path = opts.depfile
     include_header = not opts.no_header
 
+    if command == 'version':
+        print('depman {}'.format(dver))
+        return
+
     deptype = dispatch_type(opts.type)
 
     with open(path, 'rt') as f:
@@ -75,8 +79,6 @@ def _main(*args):
         print("Validation successful")
     elif command == 'export':
         deps.export(context, deptype, outfile, include_header=include_header)
-    elif command == 'version':
-        print('depman {}'.format(dver))
 
     if outfile is not sys.stdout:
         outfile.close()

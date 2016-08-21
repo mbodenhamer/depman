@@ -17,7 +17,7 @@ def test_invocation():
     assert lines[-1] == 'Validation successful'
     assert p.returncode == 0
 
-    p = Popen('depman version -f {}'.format(DEPSEX), 
+    p = Popen('depman version'.format(DEPSEX), 
               stdout=PIPE, shell=True)
     out = p.communicate()[0].decode('utf-8')
     lines = out.strip().split('\n')
