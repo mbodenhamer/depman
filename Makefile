@@ -49,7 +49,7 @@ build: check
 # Documentation
 
 docs:
-#	@$(PYDEV) sphinx-apidoc -f -o docs/ depman/ $$(find depman -name tests)	
+	@$(PYDEV) sphinx-apidoc -f -o docs/ depman/ $$(find depman -name tests)	
 	@$(PYDEV) make -C docs html
 
 view:
