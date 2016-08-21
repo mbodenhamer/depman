@@ -14,8 +14,8 @@ def test_pip():
     assert not pip.always_upgrade
     assert is_hashable(pip)
 
-    assert 'syn' in pip.freeze
-    assert 'six' in pip.freeze
+    assert 'syn' in pip._pkgs
+    assert 'six' in pip._pkgs
 
     assert pip.check()
 
@@ -52,8 +52,8 @@ def test_pip():
         raise OSError()
 
     with assign(depd, 'output', bad_output):
-        with assign(Pip, 'freeze', dict()):
-            Pip._populate_freeze()
-            assert Pip.freeze == {}
+        with assign(Pip, '_pkgs', dict()):
+            Pip._populate_pkgs()
+            assert Pip._pkgs == {}
 
 #-------------------------------------------------------------------------------

@@ -45,7 +45,6 @@ class Update(Idempotent):
 class Apt(Dependency):
     '''Representation of an apt dependency'''
     key = 'apt'
-    pkgs = dict()
     order = 10
 
     _attrs = dict(order = Attr(int, order))
@@ -53,20 +52,14 @@ class Apt(Dependency):
     @classmethod
     @create_hook
     def _populate_pkgs(cls):
-        if not cls.pkgs:
+        if not cls._pkgs:
             try:
                 lines = output('dpkg -l').split('\n')
                 partss = [l.split() for l in lines[5:] if l]
                 pkgs = [(p[1], p[2]) for p in partss if fnmatch(p[0], '?i')]
-                cls.pkgs = dict(pkgs)
+                cls._pkgs = dict(pkgs)
             except OSError:
                 pass
-
-    def check(self):
-        if self.name in self.pkgs:
-            if self.version(self.pkgs[self.name]):
-                return True
-        return False
 
     def satisfy(self):
         up = [Update(order=self.order)]
@@ -80,7 +73,7 @@ class Apt(Dependency):
         
         if not self.check():
             if isinstance(self.version, (Eq, Le)):
-                if self.name in self.pkgs:
+                if self.installed():
                     return down
                 return instver
             return inst

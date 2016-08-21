@@ -55,6 +55,7 @@ DEPENDENCY_KEYS = dict()
 
 class Dependency(Base):
     '''Basic representation of a dependency'''
+    _pkgs = dict()
     key = None
     order = 10000
 
@@ -101,10 +102,16 @@ class Dependency(Base):
 
     def check(self):
         '''Returns True if the dependency is satisfied, False otherwise.'''
-        raise NotImplementedError
+        if self.installed():
+            if self.version(self._pkgs[self.name]):
+                return True
+        return False
 
     def export(self):
         return self.name + self.version.emit()
+
+    def installed(self):
+        return self.name in self._pkgs
 
     def satisfy(self):
         '''Satisfies the dependency if currently unsatisfied.'''

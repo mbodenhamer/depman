@@ -15,15 +15,15 @@ def test_apt():
 
     if depd.output('which apt-get'):
         if depd.output('which make'):
-            assert 'make' in Apt.pkgs
+            assert 'make' in Apt._pkgs
 
     with assign(depd, 'command', MagicMock()):
-        with assign(Apt, 'pkgs', dict(make='1.0')):
+        with assign(Apt, '_pkgs', dict(make='1.0')):
             assert apt.check()
             assert apt.satisfy() == []
             assert depd.command.call_count == 0
 
-        with assign(Apt, 'pkgs', dict()):
+        with assign(Apt, '_pkgs', dict()):
             assert not apt.check()
 
             ops = apt.satisfy()
@@ -45,12 +45,12 @@ def test_apt():
         raise OSError()
 
     with assign(depd, 'output', bad_output):
-        with assign(Apt, 'pkgs', dict()):
+        with assign(Apt, '_pkgs', dict()):
             Apt._populate_pkgs()
-            assert Apt.pkgs == {}
+            assert Apt._pkgs == {}
 
     if depd.output('which apt-get'):
         if depd.output('which make'):
-            assert 'make' in Apt.pkgs
+            assert 'make' in Apt._pkgs
 
 #-------------------------------------------------------------------------------

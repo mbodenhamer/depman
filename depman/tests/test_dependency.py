@@ -50,7 +50,8 @@ def test_dependency():
 
     dep = Dependency('foo')
     assert dep.name == 'foo'
-    assert_raises(NotImplementedError, dep.check)
+    assert not dep.installed()
+    assert not dep.check()
     assert_raises(NotImplementedError, dep.satisfy)
 
     assert_equivalent(Dependency.from_conf('foo'), dep)
@@ -145,8 +146,8 @@ def test_dependencies():
     with open(DEPS5, 'rt') as f:
         deps5 = Dependencies.from_yaml(f)
    
-    with assign(Apt, 'pkgs', dict()):
-        with assign(Pip, 'freeze', dict()):
+    with assign(Apt, '_pkgs', dict()):
+        with assign(Pip, '_pkgs', dict()):
             from depman.apt import Install, Update
             from depman.pip import Install as PipInstall
 
@@ -181,8 +182,8 @@ def test_dependencies():
     with open(TEST1, 'rt') as f:
         assert f.read() == eout
 
-    with assign(Apt, 'pkgs', dict(a='1', b='1.3', c='1.3', f='1')):
-        with assign(Pip, 'freeze', dict(a='1', b='1.3', c='1.3')):
+    with assign(Apt, '_pkgs', dict(a='1', b='1.3', c='1.3', f='1')):
+        with assign(Pip, '_pkgs', dict(a='1', b='1.3', c='1.3')):
             from depman.apt import Install, Update, Remove
             from depman.pip import Install as PipInstall
             

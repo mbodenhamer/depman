@@ -28,8 +28,8 @@ def test_main():
     # Satisfy
     with assign(aptd, 'command', MagicMock()):
         with assign(pipd, 'command', MagicMock()):
-            with assign(Pip, 'freeze', dict(lxml='', PyYAML='')):
-                with assign(Apt, 'pkgs', {'libxml2-dev': '',
+            with assign(Pip, '_pkgs', dict(lxml='', PyYAML='')):
+                with assign(Apt, '_pkgs', {'libxml2-dev': '',
                                           'libxslt1-dev': ''}):
                     invoke(['satisfy', '-f', DEPS1])
                     assert aptd.command.call_count == 0
@@ -38,7 +38,7 @@ def test_main():
     # Validate
     with assign(aptd, 'command', MagicMock()):
         with assign(pipd, 'command', MagicMock()):
-            with assign(Pip, 'freeze', dict(lxml='', PyYAML='')):
+            with assign(Pip, '_pkgs', dict(lxml='', PyYAML='')):
                 invoke(['validate', '-f', DEPS1])
                 assert aptd.command.call_count == 0
                 assert pipd.command.call_count == 0
