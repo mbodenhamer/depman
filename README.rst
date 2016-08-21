@@ -118,4 +118,3 @@ The following features are planned for future releases:
 * Relative order specification for dependency satisfaction
 * Support for other package managers
 * Support for scripted installs from source
-* Export to requirements files for various package management systems
