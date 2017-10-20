@@ -5,9 +5,9 @@
 #    pip-compile --output-file requirements.txt requirements.in
 #
 decorator==4.0.10         # via networkx
-Jinja2==2.8               # via syn
-MarkupSafe==0.23          # via jinja2
+jinja2==2.8               # via syn
+markupsafe==0.23          # via jinja2
 networkx==1.11
-PyYAML==3.11              # via syn
+pyyaml==3.11              # via syn
 six==1.10.0               # via syn
 syn==0.0.11

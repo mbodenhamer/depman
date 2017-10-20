@@ -1,13 +1,15 @@
+Sphinx
 check-manifest
 coverage
 detox
 fmap
 ipdb
+ipdbplugin
+ipython
 lxml
 mock
 nose
 pip-tools
-Sphinx
-twine
 tox
+twine
 xunitmerge
