@@ -4,58 +4,66 @@ depman package
 Submodules
 ----------
 
-depman.apt module
------------------
+depman\.apt module
+------------------
 
 .. automodule:: depman.apt
     :members:
     :undoc-members:
     :show-inheritance:
 
-depman.dependency module
-------------------------
+depman\.dependency module
+-------------------------
 
 .. automodule:: depman.dependency
     :members:
     :undoc-members:
     :show-inheritance:
 
-depman.globals module
----------------------
+depman\.globals module
+----------------------
 
 .. automodule:: depman.globals
     :members:
     :undoc-members:
     :show-inheritance:
 
-depman.main module
-------------------
+depman\.main module
+-------------------
 
 .. automodule:: depman.main
     :members:
     :undoc-members:
     :show-inheritance:
 
-depman.operation module
------------------------
+depman\.operation module
+------------------------
 
 .. automodule:: depman.operation
     :members:
     :undoc-members:
     :show-inheritance:
 
-depman.pip module
------------------
+depman\.pip module
+------------------
 
 .. automodule:: depman.pip
     :members:
     :undoc-members:
     :show-inheritance:
 
-depman.relation module
-----------------------
+depman\.relation module
+-----------------------
 
 .. automodule:: depman.relation
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+depman\.yatr module
+-------------------
+
+.. automodule:: depman.yatr
     :members:
     :undoc-members:
     :show-inheritance:

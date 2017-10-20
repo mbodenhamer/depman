@@ -4,6 +4,7 @@ Changelog
 0.3.3 (2017-10-21)
 ~~~~~~~~~~~~~~~~~~
 - Added support for yatr tasks
+- Fixed issue with single-dependency ordering
 
 0.3.2 (2016-08-20)
 ~~~~~~~~~~~~~~~~~~
