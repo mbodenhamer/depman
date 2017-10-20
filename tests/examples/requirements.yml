@@ -23,3 +23,7 @@ prod:
     - six:
         always_upgrade: yes
     - syn>=0.0.10
+
+  yatr:
+    - cleanup:
+        yatrfile: provisioning_tasks.yml
