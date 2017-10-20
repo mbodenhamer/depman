@@ -1,7 +1,7 @@
 prod:
   apt:
-    - bc
-    - dc
+    - foo123
+    - bar456
   
   pip:
     - numpy

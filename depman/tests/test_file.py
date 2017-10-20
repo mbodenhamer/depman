@@ -35,7 +35,7 @@ def test1():
     with assign(_apt, 'command', MagicMock()):
         ops[2].execute()
         assert _apt.command.call_count == 1
-        _apt.command.assert_called_with('apt-get install -y bc dc')
+        _apt.command.assert_called_with('apt-get install -y foo123 bar456')
 
     with assign(_pip, 'command', MagicMock()):
         ops[3].execute()
