@@ -5,7 +5,6 @@ prod:
   
   pip:
     - numpy
-    - matplotlib
     - openopt:
         order: 500
 
