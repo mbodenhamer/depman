@@ -1,7 +1,6 @@
 prod:
   apt:
     - foo123
-    - bar456
   
   pip:
     - numpy
