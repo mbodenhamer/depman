@@ -17,8 +17,9 @@ docker-build:
 
 docker-first-build:
 	@docker build -t $(IMAGE):latest --build-arg versions=$(VERSIONS) \
-	--build-arg reqs=requirements.in \
-	--build-arg devreqs=dev-requirements.in .
+	--build-arg reqs=requirements.yml .
+	@$(PYDEV) depman export dev -t pip -o dev-requirements.in --no-header
+	@$(PYDEV) depman export prod -t pip -o requirements.in --no-header
 	@$(PYDEV) pip-compile dev-requirements.in
 	@$(PYDEV) pip-compile requirements.in
 
