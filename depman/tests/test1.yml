@@ -3,7 +3,7 @@ prod:
     - foo123
   
   pip:
-    - numpy
+    - bar456 # numpy, but bar456 b/c travis
     - openopt:
         order: 500
 

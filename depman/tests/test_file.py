@@ -40,7 +40,7 @@ def test1():
     with assign(_pip, 'command', MagicMock()):
         ops[3].execute()
         assert _pip.command.call_count == 1
-        _pip.command.assert_called_with('pip install --upgrade numpy')
+        _pip.command.assert_called_with('pip install --upgrade bar456')
 
     with assign(_pip, 'command', MagicMock()):
         ops[4].execute()
