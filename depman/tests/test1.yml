@@ -1,0 +1,18 @@
+prod:
+  apt:
+    - bc
+    - dc
+  
+  pip:
+    - numpy
+    - matplotlib
+    - openopt:
+        order: 500
+
+  yatr:
+    - init:
+        order: -300
+        yatrfile: /foo/bar.yml
+    - cleanup:
+        yatrfile: /foo/bar.yml
+

@@ -48,7 +48,9 @@ class Operation(ListWrapper):
             op = ops[0]
             if not same_lineage(self, op):
                 break
-            
+            if not self.order == op.order:
+                break
+
             self._reduce_single(op, ops)
             if N == len(ops):
                 break

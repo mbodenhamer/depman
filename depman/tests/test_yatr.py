@@ -27,7 +27,7 @@ def test_yatr():
 
 
     yatr2 = Yatr.from_conf({'bar baz':
-                            {'order': '-30',
+                            {'order': -30,
                              'yatrfile': '/foo/bar.yml'}})
     assert yatr2.order == -30
 

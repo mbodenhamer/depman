@@ -1,6 +1,5 @@
 from mock import MagicMock
 from depman import Pip, Operation, Ge
-from nose.tools import assert_raises
 from syn.base_utils import assign, is_hashable
 from depman import pip as depd
 from depman.pip import Install
