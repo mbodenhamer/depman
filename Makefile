@@ -7,7 +7,7 @@ IMAGE = mbodenhamer/${PACKAGE}-dev
 PYDEV = docker run --rm -it -e BE_UID=`id -u` -e BE_GID=`id -g` \
 	-v /var/run/docker.sock:/var/run/docker.sock \
 	-v $(CURDIR):/app $(IMAGE)
-VERSIONS = 2.7.11,3.4.4,3.5.1
+VERSIONS = 2.7.14,3.6.2
 
 #-------------------------------------------------------------------------------
 # Docker image management
@@ -71,8 +71,10 @@ print-version:
 #-------------------------------------------------------------------------------
 # Tests
 
-PY34 = source .tox/py34/bin/activate
-UNIT_TEST = nosetests -s -v --pdb --pdb-failures -w depman/
+PY36 = source .tox/py36/bin/activate
+TEST = nosetests -s -v --pdb --pdb-failures
+UNIT_TEST = $(TEST) -w $(PACKAGE)/
+INSTALL = pip install .
 
 test:
 	@$(PYDEV) coverage erase
@@ -83,10 +85,13 @@ unit-test:
 	@$(PYDEV) bash -c "$(UNIT_TEST)"
 
 py3-unit-test:
-	@$(PYDEV) bash -c "$(PY34); $(UNIT_TEST)"
+	@$(PYDEV) bash -c "$(PY36); $(UNIT_TEST)"
 
 quick-test:
-	@$(PYDEV) bash -c "pip install . && nosetests -v --pdb --pdb-failures"
+	@$(PYDEV) bash -c "$(INSTALL); $(TEST)"
+
+py3-quick-test:
+	@$(PYDEV) bash -c "$(PY36); $(INSTALL); $(TEST)"
 
 dist-test: build
 	@$(PYDEV) dist-test $(VERSION)
@@ -94,7 +99,7 @@ dist-test: build
 show:
 	@python -c "import webbrowser as wb; wb.open('htmlcov/index.html')"
 
-.PHONY: test quick-test dist-test show
+.PHONY: test quick-test dist-test show unit-test py3-unit-test py3-quick-test
 #-------------------------------------------------------------------------------
 # Cleanup
 
