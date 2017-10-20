@@ -3,6 +3,7 @@ from .operation import *
 from .dependency import *
 from .apt import *
 from .pip import *
+from .yatr import *
 
 from syn.base_utils import harvest_metadata, delete
 with delete(harvest_metadata, delete):

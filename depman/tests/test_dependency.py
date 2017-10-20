@@ -4,7 +4,7 @@ from mock import MagicMock
 from nose.tools import assert_raises
 from depman import dependency as depd
 from syn.base_utils import assert_equivalent, assign, is_hashable
-from depman import Dependency, Dependencies, Apt, Pip, Eq
+from depman import Dependency, Dependencies, Apt, Pip, Yatr, Eq
 from depman import apt as aptd
 from depman import pip as pipd
 from depman.main import dispatch_type
@@ -43,9 +43,11 @@ def test_status():
 
 def test_dependency():
     assert depd.DEPENDENCY_KEYS == dict(apt = Apt,
-                                        pip = Pip)
+                                        pip = Pip,
+                                        yatr = Yatr)
     assert depd.DEPENDENCY_ORDERS == dict(apt = Apt.order,
-                                          pip = Pip.order)
+                                          pip = Pip.order,
+                                          yatr = Yatr.order)
     
 
     dep = Dependency('foo')

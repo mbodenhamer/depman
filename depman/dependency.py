@@ -68,6 +68,7 @@ class Dependency(Base):
     _opts = dict(init_validate = True,
                  optional_none = True,
                  make_hashable = True,
+                 coerce_args = True,
                  args = ('name', 'version'))
 
     @classmethod
