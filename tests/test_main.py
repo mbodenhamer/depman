@@ -1,12 +1,14 @@
 import os
+import sys
 from shlex import shlex
 from syn.five import STR
 from mock import MagicMock
-from syn.base_utils import assign
-from depman.main import _main
+from syn.base_utils import assign, capture
+from depman.main import _main, main
 import depman.apt as aptd
 import depman.pip as pipd
 from depman import Pip, Apt
+from depman import __version__ as dver
 
 #-------------------------------------------------------------------------------
 
@@ -24,6 +26,12 @@ def test_main():
             _main(*shlex.split(cmd))
         else:
             _main(*cmd)
+
+    # Version
+    with assign(sys, 'argv', ['', 'version']):
+        with capture() as (out, err):
+            main()
+    assert out.getvalue() == 'depman {}\n'.format(dver)
 
     # Satisfy
     with assign(aptd, 'command', MagicMock()):
