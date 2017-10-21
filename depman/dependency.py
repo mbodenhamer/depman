@@ -1,13 +1,13 @@
 import yaml
 import shlex
 from . import globals as globs
-from syn.five import STR
+from syn.five import STR, xrange
 from syn.type import AnyType
 from functools import partial
 from operator import attrgetter
 from subprocess import Popen, PIPE
 from syn.type import List, Mapping
-from syn.base_utils import AttrDict
+from syn.base_utils import AttrDict, Precedes, topological_sorting
 from syn.base import Base, Attr, create_hook
 from .operation import Operation
 from .relation import Relation, Eq
@@ -64,6 +64,8 @@ class Dependency(Base):
                                  doc='Version relation for this dependency'),
                   always_upgrade = Attr(bool, default=False,
                                         doc='Always attempt to upgrade'),
+                  before = Attr(STR, ''),
+                  after = Attr(STR, ''),
                   order = Attr(int, default = order, internal = True))
     _opts = dict(init_validate = True,
                  optional_none = True,
@@ -116,6 +118,13 @@ class Dependency(Base):
     def satisfy(self):
         '''Satisfies the dependency if currently unsatisfied.'''
         raise NotImplementedError
+
+    def validate(self):
+        super(Dependency, self).validate()
+
+        if self.before and self.after:
+            raise AttributeError('Dependency cannot have both "before" and '
+                                 '"after" attributes')
 
 
 #-------------------------------------------------------------------------------
@@ -185,17 +194,75 @@ class Dependencies(Base):
             ret += getattr(self.contexts, con)
         ret.sort(key=attrgetter('order'))
         return ret
-
-    def satisfy(self, context, deptype=None, execute=True):
+        
+    def dependencies_to_satisfy(self, context, deptype=None):
         if deptype is None:
             deptype = AnyType()
 
-        ops = []
+        deps = []
         for dep in self.deps_from_context(context):
             if deptype.query(dep):
-                ops.extend(dep.satisfy())
+                deps.append(dep)
 
-        Operation.optimize(ops)
+        deps.sort(key=attrgetter('order'))
+        env = {dep.name: dep for dep in deps}
+
+        before = []
+        after = []
+        rest = []
+        for dep in deps:
+            if dep.before:
+                before.append(dep)
+            elif dep.after:
+                after.append(dep)
+            else:
+                rest.append(dep)
+
+        rels = []
+        for k in xrange(len(rest) - 1):
+            rels.append(Precedes(rest[k], rest[k + 1]))
+
+        for dep in before:
+            rels.append(Precedes(dep, env[dep.before]))
+
+        for dep in after:
+            rels.append(Precedes(env[dep.after], dep))
+
+        sdeps = topological_sorting(deps, rels)
+        return sdeps
+
+    def dependency_operations(self, deps):
+        '''Induce a partition on groups of operations according to before and after attributes, if present.  Optimize each partition group locally.'''
+        ops = []
+        opss = []
+
+        def push():
+            if ops:
+                Operation.optimize(ops)
+                opss.append(list(ops))
+                while ops:
+                    ops.pop()
+
+        for dep in deps:
+            oplist = dep.satisfy()
+            if dep.before:
+                ops.extend(oplist)
+                push()
+            elif dep.after:
+                push()
+                ops.extend(oplist)
+            else:
+                ops.extend(oplist)
+
+        push()
+        ret = []
+        for lst in opss:
+            ret.extend(lst)
+        return ret
+
+    def satisfy(self, context, deptype=None, execute=True):
+        deps = self.dependencies_to_satisfy(context, deptype)
+        ops = self.dependency_operations(deps)
         if execute:
             for op in ops:
                 op.execute()
