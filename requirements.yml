@@ -22,6 +22,7 @@ dev:
 
 prod:
   pip:
-    - networkx
-    - syn
-    - yatr
+    - syn:
+        always_upgrade: yes
+    - yatr:
+        always_upgrade: yes
