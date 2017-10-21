@@ -128,4 +128,3 @@ The following features are planned for future releases:
 * apt PPA support
 * Relative order specification for dependency satisfaction
 * Support for other package managers
-* Support for scripted installs from source
