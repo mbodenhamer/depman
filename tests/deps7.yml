@@ -1,13 +1,10 @@
 prod:
   apt:
-    - a
+    - a:
+        after: b
     - b
-    - c:
-        after: d
-    - d
 
   pip:
-    - e
-    - f
-    - g:
+    - c
+    - d:
         before: a

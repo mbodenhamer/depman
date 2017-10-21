@@ -20,6 +20,7 @@ DEPS4 = os.path.join(DIR, '../../tests/deps4.yml')
 DEPS5 = os.path.join(DIR, '../../tests/deps5.yml')
 DEPS6 = os.path.join(DIR, '../../tests/deps6.yml')
 DEPS7 = os.path.join(DIR, '../../tests/deps7.yml')
+DEPSEX = os.path.join(DIR, '../../tests/examples/requirements.yml')
 TEST1 = os.path.join(DIR, 'test1')
 
 #-------------------------------------------------------------------------------
@@ -221,35 +222,25 @@ def test_dependencies():
             from depman.apt import Install, Update
             from depman.pip import Install as PipInstall
 
-            ops = deps7.satisfy('prod', execute=False)
-            # assert ops == [PipInstall('g', order=Pip.order),
-            #                Update(order=Apt.order),
-            #                Install('a', 'b', 'd', order=Apt.order),
-            #                Update(order=Apt.order),
-            #                Install('c', order=Apt.order),
-            #                PipInstall('e', 'f', order=Pip.order)]
-
             idx_upd = []
+            ops = deps7.satisfy('prod', execute=False)
             for k, op in enumerate(ops):
                 if isinstance(op, PipInstall):
-                    if list(op) == ['g']:
-                        idx_g = k
-                    elif list(op) == ['e', 'f']:
-                        idx_ef = k
+                    if list(op) == ['d']:
+                        idx_d = k
                 elif isinstance(op, Install):
-                    if list(op) == ['a', 'b', 'd']:
-                        idx_abd = k
-                    elif list(op) == ['c']:
-                        idx_c = k
+                    if set(op) == {'b'}:
+                        idx_b = k
+                    elif list(op) == ['a']:
+                        idx_a = k
                 elif isinstance(op, Update):
                     idx_upd.append(k)
 
-            assert idx_g < idx_abd
-            assert idx_abd < idx_c
-            assert idx_abd < idx_ef
+            assert idx_d < idx_a
+            assert idx_b < idx_a
 
-            assert idx_upd[0] == idx_abd - 1 or idx_upd[0] == idx_c - 1
-            assert idx_upd[1] == idx_abd - 1 or idx_upd[1] == idx_c - 1
+            assert idx_upd[0] == idx_a - 1 or idx_upd[0] == idx_b - 1
+            assert idx_upd[1] == idx_a - 1 or idx_upd[1] == idx_b - 1
 
             with assign(aptd, 'command', MagicMock()):
                 with assign(pipd, 'command', MagicMock()):
@@ -257,11 +248,32 @@ def test_dependencies():
 
                     assert aptd.command.call_count == 4
                     aptd.command.assert_any_call('apt-get update')
-                    aptd.command.assert_any_call('apt-get install -y a b d')
-                    aptd.command.assert_any_call('apt-get install -y c')
+                    aptd.command.assert_any_call('apt-get install -y a')
+                    aptd.command.assert_any_call('apt-get install -y b')
 
                     assert pipd.command.call_count == 2
-                    pipd.command.assert_any_call('pip install --upgrade e f')
-                    pipd.command.assert_any_call('pip install --upgrade g')
+                    pipd.command.assert_any_call('pip install --upgrade c')
+                    pipd.command.assert_any_call('pip install --upgrade d')
+
+    with open(DEPSEX, 'rt') as f:
+        depsex = Dependencies.from_yaml(f)
+
+    with assign(Apt, '_pkgs', dict()):
+        with assign(Pip, '_pkgs', dict()):
+            from depman.pip import Install as PipInstall
+            from depman.yatr import Task
+
+            ops = depsex.satisfy('prod', execute=False)
+            for k, op in enumerate(ops):
+                if isinstance(op, PipInstall):
+                    if 'numpy' in op:
+                        idx_np = k
+                    elif 'openopt' in op:
+                        idx_oo = k
+
+                elif isinstance(op, Task):
+                    idx_yatr = k
+
+            assert idx_np < idx_oo < idx_yatr
 
 #-------------------------------------------------------------------------------

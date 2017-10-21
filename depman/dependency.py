@@ -281,7 +281,7 @@ class Dependencies(Base):
             out = self.export_header()
         exports = sorted([dep.export() for dep in deps])
         out += '\n'.join(exports)
-        
+
         if write:
             outfile.write(out)
         return out
