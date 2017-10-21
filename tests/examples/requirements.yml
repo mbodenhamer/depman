@@ -23,7 +23,11 @@ prod:
     - six:
         always_upgrade: yes
     - syn>=0.0.10
+    - numpy
+    - openopt:
+        after: numpy
 
   yatr:
     - cleanup:
         yatrfile: provisioning_tasks.yml
+        after: openopt

@@ -1,6 +1,10 @@
 Changelog
 ---------
 
+0.3.4 (2017-10-22)
+~~~~~~~~~~~~~~~~~~
+- Added relative depedency ordering
+
 0.3.3 (2017-10-21)
 ~~~~~~~~~~~~~~~~~~
 - Added support for yatr tasks
