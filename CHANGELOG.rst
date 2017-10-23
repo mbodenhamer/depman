@@ -1,7 +1,7 @@
 Changelog
 ---------
 
-0.3.4 (2017-10-22)
+0.3.4 (2017-10-23)
 ~~~~~~~~~~~~~~~~~~
 - Added relative depedency ordering
 

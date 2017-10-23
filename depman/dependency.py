@@ -1,5 +1,6 @@
 import yaml
 import shlex
+from collections import defaultdict
 from . import globals as globs
 from syn.five import STR, xrange
 from syn.type import AnyType
@@ -204,34 +205,36 @@ class Dependencies(Base):
             if deptype.query(dep):
                 deps.append(dep)
 
-        deps.sort(key=attrgetter('order'))
-        env = {dep.name: dep for dep in deps}
+        return deps
 
-        before = []
-        after = []
-        rest = []
-        for dep in deps:
-            if dep.before:
-                before.append(dep)
-            elif dep.after:
-                after.append(dep)
-            else:
-                rest.append(dep)
+        # deps.sort(key=attrgetter('order'))
+        # env = {dep.name: dep for dep in deps}
 
-        rels = []
-        for k in xrange(len(rest) - 1):
-            rels.append(Precedes(rest[k], rest[k + 1]))
+        # before = []
+        # after = []
+        # rest = []
+        # for dep in deps:
+        #     if dep.before:
+        #         before.append(dep)
+        #     elif dep.after:
+        #         after.append(dep)
+        #     else:
+        #         rest.append(dep)
 
-        for dep in before:
-            rels.append(Precedes(dep, env[dep.before]))
+        # rels = []
+        # for k in xrange(len(rest) - 1):
+        #     rels.append(Precedes(rest[k], rest[k + 1]))
 
-        for dep in after:
-            rels.append(Precedes(env[dep.after], dep))
+        # for dep in before:
+        #     rels.append(Precedes(dep, env[dep.before]))
 
-        sdeps = topological_sorting(deps, rels)
-        return sdeps
+        # for dep in after:
+        #     rels.append(Precedes(env[dep.after], dep))
 
-    def dependency_operations(self, deps):
+        # sdeps = topological_sorting(deps, rels)
+        # return sdeps
+
+    def dependency_operations_old(self, deps):
         '''Induce a partition on groups of operations according to before and after attributes, if present.  Optimize each partition group locally.'''
         ops = []
         opss = []
@@ -258,6 +261,92 @@ class Dependencies(Base):
         ret = []
         for lst in opss:
             ret.extend(lst)
+        return ret
+
+    def dependency_operations(self, deps):
+        groups = defaultdict(list)
+        for dep in deps:
+            groups[dep.order].append(dep)
+            
+        dep_to_group = {}
+        for group in groups.values():
+            for dep in group:
+                dep_to_group[dep] = group[0].order
+
+        name_to_dep = {dep.name: dep for dep in deps}
+
+        special_deps = [] # before or after relations specified
+        for dep in deps:
+            if dep.before or dep.after:
+                special_deps.append(dep)
+                groups[dep.order].remove(dep)
+                dep_to_group[dep] = dep
+
+                if not groups[dep.order]:
+                    del groups[dep.order]
+
+        sorted_groups = []
+        for order in sorted(groups.keys()):
+            groups[order].sort(key=attrgetter('name'))
+            sorted_groups.append(order)
+
+        rels = []
+        nodes = special_deps + sorted_groups
+
+        for k in xrange(len(sorted_groups) - 1):
+            rels.append(Precedes(sorted_groups[k], sorted_groups[k+1]))
+
+        def query(name):
+            return dep_to_group[name_to_dep[name]]
+
+        for dep in special_deps:
+            if dep.before:
+                rels.append(Precedes(dep, query(dep.before)))
+            else: # dep.after
+                rels.append(Precedes(query(dep.after), dep))
+
+        def parents(d):
+            ret = []
+            for rel in rels:
+                if rel.B is d:
+                    ret.append(rel.A)
+            return ret
+
+        def children(d):
+            ret = []
+            for rel in rels:
+                if rel.A is d:
+                    ret.append(rel.B)
+            return ret
+
+        def order(d):
+            if isinstance(d, int):
+                return d
+            return d.order
+
+        # Preserve intuitive order for dangling elements
+        # (e.g. dangling apt should precede any pip if possible)
+        for dep in special_deps:
+            if dep.after:
+                if not children(dep):
+                    for par in parents(dep):
+                        for ch in children(par):
+                            if order(ch) > dep.order:
+                                rels.append(Precedes(dep, ch))
+
+        ret = []
+        sorting = topological_sorting(nodes, rels)
+        
+        for item in sorting:
+            if isinstance(item, Dependency):
+                ops = item.satisfy()
+            else:
+                ops = []
+                for dep in groups[item]:
+                    ops.extend(dep.satisfy())
+            Operation.optimize(ops)
+            ret.extend(ops)
+
         return ret
 
     def satisfy(self, context, deptype=None, execute=True):

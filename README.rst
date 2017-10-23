@@ -134,4 +134,3 @@ The following features are planned for future releases:
 
 * apt PPA support
 * Support for other package managers
-* More intuitive dependency satisfaction operation ordering
