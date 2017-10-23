@@ -18,16 +18,19 @@ test:
 prod:
   pip:
     - gevent:
-        version: <=1.0.2
-    - texttable
+        version: '>=1.0.2'
+    - syn>=0.0.14
     - six:
         always_upgrade: yes
-    - syn>=0.0.10
     - numpy
     - openopt:
         after: numpy
 
   yatr:
+    - install-from-source:
+        before: libxslt1-dev
+    - install-from-source-2:
+        before: gevent
+        after: libxslt1-dev
     - cleanup:
-        yatrfile: provisioning_tasks.yml
-        after: openopt
+        yatrfile: other_tasks.yml

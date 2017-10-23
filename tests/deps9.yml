@@ -7,3 +7,7 @@ prod:
         after: b
     - d:
         after: b
+
+  yatr:
+    - z:
+        after: b

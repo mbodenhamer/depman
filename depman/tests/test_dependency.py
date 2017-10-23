@@ -288,15 +288,18 @@ def test_dependencies():
     with assign(Apt, '_pkgs', dict()):
         with assign(Pip, '_pkgs', dict()):
             from depman.pip import Install as PipInstall
+            from depman.yatr import Task
 
             ops = deps9.satisfy('prod', execute=False)
             assert ops[0:2] == [PipInstall('a', order=Pip.order),
                                 PipInstall('b', order=Pip.order)]
             
             others = [PipInstall('c', order=Pip.order),
-                      PipInstall('d', order=Pip.order)]
+                      PipInstall('d', order=Pip.order),
+                      Task('z', order=Yatr.order)]
             assert ops[2] in others
             assert ops[3] in others
+            assert ops[4] in others
 
 
     with open(DEPS10, 'rt') as f:
@@ -344,20 +347,27 @@ def test_dependencies():
 
     with assign(Apt, '_pkgs', dict()):
         with assign(Pip, '_pkgs', dict()):
+            from depman.apt import Install, Update
             from depman.pip import Install as PipInstall
             from depman.yatr import Task
 
-            ops = depsex.satisfy('prod', execute=False)
-            for k, op in enumerate(ops):
-                if isinstance(op, PipInstall):
-                    if 'numpy' in op:
-                        idx_np = k
-                    elif 'openopt' in op:
-                        idx_oo = k
-
-                elif isinstance(op, Task):
-                    idx_yatr = k
-
-            assert idx_np < idx_oo < idx_yatr
+            ops = depsex.satisfy('all', execute=False)
+            _ops = [Task('install-from-source', order=Yatr.order),
+                    Update(order=Apt.order),
+                    Install('libxml2-dev=2.9.1+dfsg1-5+deb8u2',
+                            'libxslt1-dev', order=Apt.order),
+                    Task('install-from-source-2', order=Yatr.order),
+                    PipInstall('Sphinx',
+                               'coverage',
+                               'gevent',
+                               'lxml',
+                               'nose',
+                               'numpy',
+                               'six',
+                               'syn',
+                               order=Pip.order),
+                    PipInstall('openopt', order=Pip.order),
+                    Task('-f other_tasks.yml', 'cleanup', order=Yatr.order)]
+            assert ops == _ops
 
 #-------------------------------------------------------------------------------
