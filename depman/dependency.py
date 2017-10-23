@@ -276,7 +276,7 @@ class Dependencies(Base):
                     for par in parents(dep):
                         for ch in children(par):
                             if ch is not dep:
-                                if order(ch) >= dep.order:
+                                if order(ch) > dep.order:
                                     rels.append(Precedes(dep, ch))
 
         ret = []

@@ -22,6 +22,7 @@ DEPS5 = os.path.join(DIR, '../../tests/deps5.yml')
 DEPS6 = os.path.join(DIR, '../../tests/deps6.yml')
 DEPS7 = os.path.join(DIR, '../../tests/deps7.yml')
 DEPS8 = os.path.join(DIR, '../../tests/deps8.yml')
+DEPS9 = os.path.join(DIR, '../../tests/deps9.yml')
 DEPSEX = os.path.join(DIR, '../../tests/examples/requirements.yml')
 TEST1 = os.path.join(DIR, 'test1')
 
@@ -281,6 +282,23 @@ def test_dependencies():
                         assert yatrd.command.call_count == 1
                         yatrd.command.assert_any_call('yatr z')
                         
+
+    with open(DEPS9, 'rt') as f:
+        deps9 = Dependencies.from_yaml(f)
+
+    with assign(Apt, '_pkgs', dict()):
+        with assign(Pip, '_pkgs', dict()):
+            from depman.pip import Install as PipInstall
+
+            ops = deps9.satisfy('prod', execute=False)
+            assert ops[0:2] == [PipInstall('a', order=Pip.order),
+                                PipInstall('b', order=Pip.order)]
+            
+            others = [PipInstall('c', order=Pip.order),
+                      PipInstall('d', order=Pip.order)]
+            assert ops[2] in others
+            assert ops[3] in others
+
 
     with open(DEPSEX, 'rt') as f:
         depsex = Dependencies.from_yaml(f)

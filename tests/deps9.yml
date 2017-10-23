@@ -1,0 +1,9 @@
+prod:
+  pip:
+    - a
+    - b:
+        after: a
+    - c:
+        after: b
+    - d:
+        after: b
