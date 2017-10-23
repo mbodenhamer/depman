@@ -222,25 +222,13 @@ def test_dependencies():
             from depman.apt import Install, Update
             from depman.pip import Install as PipInstall
 
-            idx_upd = []
             ops = deps7.satisfy('prod', execute=False)
-            for k, op in enumerate(ops):
-                if isinstance(op, PipInstall):
-                    if list(op) == ['d']:
-                        idx_d = k
-                elif isinstance(op, Install):
-                    if set(op) == {'b'}:
-                        idx_b = k
-                    elif list(op) == ['a']:
-                        idx_a = k
-                elif isinstance(op, Update):
-                    idx_upd.append(k)
-
-            assert idx_d < idx_a
-            assert idx_b < idx_a
-
-            assert idx_upd[0] == idx_a - 1 or idx_upd[0] == idx_b - 1
-            assert idx_upd[1] == idx_a - 1 or idx_upd[1] == idx_b - 1
+            assert ops == [PipInstall('d', order=Pip.order),
+                           Update(order=Apt.order),
+                           Install('b', order=Apt.order),
+                           Update(order=Apt.order),
+                           Install('a', order=Apt.order),
+                           PipInstall('c', order=Pip.order)]
 
             with assign(aptd, 'command', MagicMock()):
                 with assign(pipd, 'command', MagicMock()):

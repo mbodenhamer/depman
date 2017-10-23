@@ -207,62 +207,6 @@ class Dependencies(Base):
 
         return deps
 
-        # deps.sort(key=attrgetter('order'))
-        # env = {dep.name: dep for dep in deps}
-
-        # before = []
-        # after = []
-        # rest = []
-        # for dep in deps:
-        #     if dep.before:
-        #         before.append(dep)
-        #     elif dep.after:
-        #         after.append(dep)
-        #     else:
-        #         rest.append(dep)
-
-        # rels = []
-        # for k in xrange(len(rest) - 1):
-        #     rels.append(Precedes(rest[k], rest[k + 1]))
-
-        # for dep in before:
-        #     rels.append(Precedes(dep, env[dep.before]))
-
-        # for dep in after:
-        #     rels.append(Precedes(env[dep.after], dep))
-
-        # sdeps = topological_sorting(deps, rels)
-        # return sdeps
-
-    def dependency_operations_old(self, deps):
-        '''Induce a partition on groups of operations according to before and after attributes, if present.  Optimize each partition group locally.'''
-        ops = []
-        opss = []
-
-        def push():
-            if ops:
-                Operation.optimize(ops)
-                opss.append(list(ops))
-                while ops:
-                    ops.pop()
-
-        for dep in deps:
-            oplist = dep.satisfy()
-            if dep.before:
-                ops.extend(oplist)
-                push()
-            elif dep.after:
-                push()
-                ops.extend(oplist)
-            else:
-                ops.extend(oplist)
-
-        push()
-        ret = []
-        for lst in opss:
-            ret.extend(lst)
-        return ret
-
     def dependency_operations(self, deps):
         groups = defaultdict(list)
         for dep in deps:
@@ -331,8 +275,9 @@ class Dependencies(Base):
                 if not children(dep):
                     for par in parents(dep):
                         for ch in children(par):
-                            if order(ch) > dep.order:
-                                rels.append(Precedes(dep, ch))
+                            if ch is not dep:
+                                if order(ch) >= dep.order:
+                                    rels.append(Precedes(dep, ch))
 
         ret = []
         sorting = topological_sorting(nodes, rels)
