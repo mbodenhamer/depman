@@ -1,0 +1,16 @@
+prod:
+  apt:
+    - a
+    - b
+    - c:
+        after: d
+    - d
+
+  pip:
+    - e
+    - f
+    - g:
+        before: a
+
+  yatr:
+    - z

@@ -7,6 +7,7 @@ from syn.base_utils import assert_equivalent, assign, is_hashable
 from depman import Dependency, Dependencies, Apt, Pip, Yatr, Eq
 from depman import apt as aptd
 from depman import pip as pipd
+from depman import yatr as yatrd
 from depman.main import dispatch_type
 from depman import __version__ as dver
 
@@ -20,6 +21,7 @@ DEPS4 = os.path.join(DIR, '../../tests/deps4.yml')
 DEPS5 = os.path.join(DIR, '../../tests/deps5.yml')
 DEPS6 = os.path.join(DIR, '../../tests/deps6.yml')
 DEPS7 = os.path.join(DIR, '../../tests/deps7.yml')
+DEPS8 = os.path.join(DIR, '../../tests/deps8.yml')
 DEPSEX = os.path.join(DIR, '../../tests/examples/requirements.yml')
 TEST1 = os.path.join(DIR, 'test1')
 
@@ -242,6 +244,43 @@ def test_dependencies():
                     assert pipd.command.call_count == 2
                     pipd.command.assert_any_call('pip install --upgrade c')
                     pipd.command.assert_any_call('pip install --upgrade d')
+
+
+    with open(DEPS8, 'rt') as f:
+        deps8 = Dependencies.from_yaml(f)
+
+    with assign(Apt, '_pkgs', dict()):
+        with assign(Pip, '_pkgs', dict()):
+            from depman.apt import Install, Update
+            from depman.pip import Install as PipInstall
+            from depman.yatr import Task
+
+            ops = deps8.satisfy('prod', execute=False)
+            assert ops == [PipInstall('g', order=Pip.order),
+                           Update(order=Apt.order),
+                           Install('a', 'b', 'd', order=Apt.order),
+                           Update(order=Apt.order),
+                           Install('c', order=Apt.order),
+                           PipInstall('e', 'f', order=Pip.order),
+                           Task('z', order=Yatr.order)]
+
+            with assign(aptd, 'command', MagicMock()):
+                with assign(pipd, 'command', MagicMock()):
+                    with assign(yatrd, 'command', MagicMock()):
+                        deps8.satisfy('prod')
+
+                        assert aptd.command.call_count == 4
+                        aptd.command.assert_any_call('apt-get update')
+                        aptd.command.assert_any_call('apt-get install -y a b d')
+                        aptd.command.assert_any_call('apt-get install -y c')
+
+                        assert pipd.command.call_count == 2
+                        pipd.command.assert_any_call('pip install --upgrade e f')
+                        pipd.command.assert_any_call('pip install --upgrade g')
+
+                        assert yatrd.command.call_count == 1
+                        yatrd.command.assert_any_call('yatr z')
+                        
 
     with open(DEPSEX, 'rt') as f:
         depsex = Dependencies.from_yaml(f)
