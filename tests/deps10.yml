@@ -1,0 +1,21 @@
+prod:
+  apt:
+    - a
+    - b
+    - c:
+        after: d
+    - d
+
+  pip:
+    - e
+    - f:
+        after: g
+    - g
+
+  yatr:
+    - install-from-source:
+        before: a
+    - install-from-source-2:
+        after: c
+        before: e
+    - cleanup

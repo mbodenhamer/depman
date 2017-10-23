@@ -120,13 +120,6 @@ class Dependency(Base):
         '''Satisfies the dependency if currently unsatisfied.'''
         raise NotImplementedError
 
-    def validate(self):
-        super(Dependency, self).validate()
-
-        if self.before and self.after:
-            raise AttributeError('Dependency cannot have both "before" and '
-                                 '"after" attributes')
-
 
 #-------------------------------------------------------------------------------
 # Depedencies
@@ -246,7 +239,7 @@ class Dependencies(Base):
         for dep in special_deps:
             if dep.before:
                 rels.append(Precedes(dep, query(dep.before)))
-            else: # dep.after
+            if dep.after:
                 rels.append(Precedes(query(dep.after), dep))
 
         def parents(d):

@@ -23,6 +23,7 @@ DEPS6 = os.path.join(DIR, '../../tests/deps6.yml')
 DEPS7 = os.path.join(DIR, '../../tests/deps7.yml')
 DEPS8 = os.path.join(DIR, '../../tests/deps8.yml')
 DEPS9 = os.path.join(DIR, '../../tests/deps9.yml')
+DEPS10 = os.path.join(DIR, '../../tests/deps10.yml')
 DEPSEX = os.path.join(DIR, '../../tests/examples/requirements.yml')
 TEST1 = os.path.join(DIR, 'test1')
 
@@ -74,8 +75,6 @@ def test_dependency():
 
     f = Foo('bar', a = 1, b = 2, order=5)
     assert is_hashable(f)
-
-    assert_raises(AttributeError, Dependency, 'foo', before='a', after='b')
 
 #-------------------------------------------------------------------------------
 # Dependencies
@@ -298,6 +297,46 @@ def test_dependencies():
                       PipInstall('d', order=Pip.order)]
             assert ops[2] in others
             assert ops[3] in others
+
+
+    with open(DEPS10, 'rt') as f:
+        deps10 = Dependencies.from_yaml(f)
+
+    with assign(Apt, '_pkgs', dict()):
+        with assign(Pip, '_pkgs', dict()):
+            from depman.apt import Install, Update
+            from depman.pip import Install as PipInstall
+            from depman.yatr import Task
+
+            ops = deps10.satisfy('prod', execute=False)
+            assert ops == [Task('install-from-source', order=Yatr.order),
+                           Update(order=Apt.order),
+                           Install('a', 'b', 'd', order=Apt.order),
+                           Update(order=Apt.order),
+                           Install('c', order=Apt.order),
+                           Task('install-from-source-2', order=Yatr.order),
+                           PipInstall('e', 'g', order=Pip.order),
+                           PipInstall('f', order=Pip.order),
+                           Task('cleanup', order=Yatr.order)]
+
+            with assign(aptd, 'command', MagicMock()):
+                with assign(pipd, 'command', MagicMock()):
+                    with assign(yatrd, 'command', MagicMock()):
+                        deps10.satisfy('prod')
+
+                        assert aptd.command.call_count == 4
+                        aptd.command.assert_any_call('apt-get update')
+                        aptd.command.assert_any_call('apt-get install -y a b d')
+                        aptd.command.assert_any_call('apt-get install -y c')
+
+                        assert pipd.command.call_count == 2
+                        pipd.command.assert_any_call('pip install --upgrade e g')
+                        pipd.command.assert_any_call('pip install --upgrade f')
+
+                        assert yatrd.command.call_count == 3
+                        yatrd.command.assert_any_call('yatr install-from-source')
+                        yatrd.command.assert_any_call('yatr install-from-source-2')
+                        yatrd.command.assert_any_call('yatr cleanup')
 
 
     with open(DEPSEX, 'rt') as f:
