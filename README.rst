@@ -80,7 +80,7 @@ Suppose you have the following ``requirements.yml`` in your current working dire
     prod:
       pip:
 	- gevent:
-	    version: '>=1.0.2'
+	    version: '<=1.0.2'
 	- syn>=0.0.14
 	- six:
 	    always_upgrade: yes
@@ -104,9 +104,9 @@ Dependencies are specified in each context under each dependency type as YAML li
 
 Package version relations can be specified in various ways.  In the ``prod`` context, ``pip`` is constrained to only install a version of ``syn`` that is greater than or equal to ``0.0.14``.  Likewise, in the ``dev`` context, ``apt`` is constrained to install version ``2.9.1+dfsg1-5+deb8u2`` of ``libxml2-dev``.  And, as seen above, the ``pip`` ``gevent`` dependency is constrained to a version less than or equal to ``1.0.2``
 
-Relative dependency satisfaction ordering may be specified by use of the ``before`` and ``after`` keys.  In this example, satisfying the ``prod`` context will lead to an invocation of ``pip`` to install ``numpy``, followed by a separate invocation of ``pip`` to install ``openopt``.  Such features are useful for minimizing the hassle of installing of packages that do not properly declare their dependencies.  It should be noted that namespaces are not currently supported, so specifying ``before`` or ``after`` for a name that belongs to multiple dependencies may lead to unexpected results.  The ``before`` and ``after`` keys should only be used when relative ordering is necessary, as unnecessary usage may lead to sub-optimal execution of depedency satisfaction operations.
+Relative dependency satisfaction ordering may be specified by use of the ``before`` and ``after`` keys.  In this example, satisfying the ``prod`` context will lead to an invocation of ``pip`` to install ``numpy``, followed by a separate invocation of ``pip`` to install ``openopt``.  Such features are useful for minimizing the hassle of installing of packages that do not properly declare their dependencies.  It should be noted that namespaces are not currently supported, so specifying ``before`` or ``after`` for a name that belongs to multiple dependencies may lead to unexpected results.  The ``before`` and ``after`` keys should only be used when relative ordering is necessary, as unnecessary usage may lead to sub-optimal execution of dependency satisfaction operations.
 
-The ``yatr`` dependency is a special type that will invoke yatr_ to execute the specified task from the specified ``yatrfile`` key.  For example, the ``prod`` context specifies that a task named ``cleanup`` defined in ``other_tasks.yml`` is to be run.  If no ``yatrfile`` key is specified, the specified tasks should be defined in a file named ``yatrfile.yml`` located in the same directory as the depman requirements file.  Unless constrained from doing so by ``before`` and ``after`` specifications, ``depman`` will always attempt to satsify ``apt`` depdencies before ``pip`` dependencies, and ``pip`` dependencies before running ``yatr`` tasks.  Thus, the ``cleanup`` task will run last in this example if either the ``prod`` or ``all`` contexts are selected.
+The ``yatr`` dependency is a special type that will invoke yatr_ to execute the specified task from the specified ``yatrfile`` key.  For example, the ``prod`` context specifies that a task named ``cleanup`` defined in ``other_tasks.yml`` is to be run.  If no ``yatrfile`` key is specified, the specified tasks should be defined in a file named ``yatrfile.yml`` located in the same directory as the depman requirements file.  Unless constrained from doing so by ``before`` and ``after`` specifications, ``depman`` will always attempt to satisfy ``apt`` dependencies before ``pip`` dependencies, and ``pip`` dependencies before running ``yatr`` tasks.  Thus, the ``cleanup`` task will run last in this example if either the ``prod`` or ``all`` contexts are selected.
 
 ``yatr`` "dependencies" are not true dependencies, but task invocations, and thus cannot truly be satisfied.  As a result, invoking ``depman`` to satisfy a ``yatr`` dependency will always cause the task defined therein to be executed.  ``yatr`` dependencies can be used to perform scripted installs, cleanup and provisioning actions, and other tasks that are otherwise beyond the scope of a lightweight dependency manager.
 
@@ -123,7 +123,7 @@ On a machine where none of the specified packages are installed, running ``depma
     $ yatr -f other_tasks.yml cleanup
 
 
-Likweise, running ``depman satisfy test`` on a fresh machine is equivalent to::
+Likewise, running ``depman satisfy test`` on a fresh machine is equivalent to::
 
     $ pip install coverage nose
 
