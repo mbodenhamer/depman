@@ -351,6 +351,7 @@ def test_dependencies():
             from depman.pip import Install as PipInstall
             from depman.yatr import Task
 
+            # all
             ops = depsex.satisfy('all', execute=False)
             _ops = [Task('install-from-source', order=Yatr.order),
                     Update(order=Apt.order),
@@ -359,7 +360,7 @@ def test_dependencies():
                     Task('install-from-source-2', order=Yatr.order),
                     PipInstall('Sphinx',
                                'coverage',
-                               'gevent',
+                               'gevent==1.0.2',
                                'lxml',
                                'nose',
                                'numpy',
@@ -369,5 +370,87 @@ def test_dependencies():
                     PipInstall('openopt', order=Pip.order),
                     Task('-f other_tasks.yml', 'cleanup', order=Yatr.order)]
             assert ops == _ops
+
+            with assign(aptd, 'command', MagicMock()):
+                with assign(pipd, 'command', MagicMock()):
+                    with assign(yatrd, 'command', MagicMock()):
+                        depsex.satisfy('all')
+
+                        assert aptd.command.call_count == 2
+                        aptd.command.assert_any_call('apt-get update')
+                        aptd.command.assert_any_call('apt-get install -y libxml2-dev=2.9.1+dfsg1-5+deb8u2 libxslt1-dev')
+
+                        assert pipd.command.call_count == 2
+                        pipd.command.assert_any_call('pip install --upgrade Sphinx coverage gevent==1.0.2 lxml nose numpy six syn')
+                        pipd.command.assert_any_call('pip install --upgrade openopt')
+
+                        assert yatrd.command.call_count == 3
+                        yatrd.command.assert_any_call('yatr install-from-source')
+                        yatrd.command.assert_any_call('yatr install-from-source-2')
+                        yatrd.command.assert_any_call('yatr -f other_tasks.yml cleanup')
+
+            # test
+            ops = depsex.satisfy('test', execute=False)
+            _ops = [PipInstall('coverage', 'nose', order=Pip.order)]
+            assert ops == _ops
+
+            with assign(aptd, 'command', MagicMock()):
+                with assign(pipd, 'command', MagicMock()):
+                    with assign(yatrd, 'command', MagicMock()):
+                        depsex.satisfy('test')
+
+                        assert aptd.command.call_count == 0
+
+                        assert pipd.command.call_count == 1
+                        pipd.command.assert_any_call('pip install --upgrade coverage nose')
+
+                        assert yatrd.command.call_count == 0
+
+            # dev
+            ops = depsex.satisfy('dev', execute=False)
+            _ops = [Task('install-from-source', order=Yatr.order),
+                    Update(order=Apt.order),
+                    Install('libxml2-dev=2.9.1+dfsg1-5+deb8u2',
+                            'libxslt1-dev', order=Apt.order),
+                    PipInstall('Sphinx', 'coverage', 'lxml', 'nose', order=Pip.order)]
+            assert ops == _ops
+
+            with assign(aptd, 'command', MagicMock()):
+                with assign(pipd, 'command', MagicMock()):
+                    with assign(yatrd, 'command', MagicMock()):
+                        depsex.satisfy('dev')
+
+                        assert aptd.command.call_count == 2
+                        aptd.command.assert_any_call('apt-get update')
+                        aptd.command.assert_any_call('apt-get install -y libxml2-dev=2.9.1+dfsg1-5+deb8u2 libxslt1-dev')
+
+                        assert pipd.command.call_count == 1
+                        pipd.command.assert_any_call('pip install --upgrade Sphinx coverage lxml nose')
+
+                        assert yatrd.command.call_count == 1
+                        yatrd.command.assert_any_call('yatr install-from-source')
+
+            # prod
+            ops = depsex.satisfy('prod', execute=False)
+            _ops = [Task('install-from-source-2', order=Yatr.order),
+                    PipInstall('gevent==1.0.2', 'numpy', 'six', 'syn', order=Pip.order),
+                    PipInstall('openopt', order=Pip.order),
+                    Task('-f other_tasks.yml', 'cleanup', order=Yatr.order)]
+            assert ops == _ops
+
+            with assign(aptd, 'command', MagicMock()):
+                with assign(pipd, 'command', MagicMock()):
+                    with assign(yatrd, 'command', MagicMock()):
+                        depsex.satisfy('prod')
+
+                        assert aptd.command.call_count == 0
+
+                        assert pipd.command.call_count == 2
+                        pipd.command.assert_any_call('pip install --upgrade gevent==1.0.2 numpy six syn')
+                        pipd.command.assert_any_call('pip install --upgrade openopt')
+
+                        assert yatrd.command.call_count == 2
+                        yatrd.command.assert_any_call('yatr install-from-source-2')
+                        yatrd.command.assert_any_call('yatr -f other_tasks.yml cleanup')
 
 #-------------------------------------------------------------------------------

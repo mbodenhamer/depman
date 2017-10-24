@@ -234,13 +234,19 @@ class Dependencies(Base):
             rels.append(Precedes(sorted_groups[k], sorted_groups[k+1]))
 
         def query(name):
-            return dep_to_group[name_to_dep[name]]
+            try:
+                return dep_to_group[name_to_dep[name]]
+            except KeyError:
+                pass
 
         for dep in special_deps:
             if dep.before:
                 rels.append(Precedes(dep, query(dep.before)))
             if dep.after:
-                rels.append(Precedes(query(dep.after), dep))
+                # For when the target is in a different context
+                target = query(dep.after)
+                if target:
+                    rels.append(Precedes(target, dep))
 
         def parents(d):
             ret = []

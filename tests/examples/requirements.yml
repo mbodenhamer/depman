@@ -6,9 +6,14 @@ dev:
   apt:
     - libxml2-dev=2.9.1+dfsg1-5+deb8u2
     - libxslt1-dev
+
   pip:
     - lxml
     - Sphinx
+
+  yatr:
+    - install-from-source:
+        before: libxslt1-dev
 
 test:
   pip:
@@ -18,7 +23,7 @@ test:
 prod:
   pip:
     - gevent:
-        version: '>=1.0.2'
+        version: '<=1.0.2'
     - syn>=0.0.14
     - six:
         always_upgrade: yes
@@ -27,8 +32,6 @@ prod:
         after: numpy
 
   yatr:
-    - install-from-source:
-        before: libxslt1-dev
     - install-from-source-2:
         before: gevent
         after: libxslt1-dev
